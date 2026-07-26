@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+@variant dark (&:where(.dark, .dark *));
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+html.large-text {
+    font-size: 18px;
+}
+
+html.large-text table {
+    line-height: 1.75;
+}
+
+html.large-text input,
+html.large-text select,
+html.large-text textarea,
+html.large-text button {
+    min-height: 2.75rem;
+}
+
+html.large-text #large-text-toggle {
+    background: #18181b;
+    color: #ffffff;
+}
+
+html.large-text.dark #large-text-toggle {
+    background: #ffffff;
+    color: #09090b;
+}
+
+@theme {
+    --font-sans: 'Inter', 'Sarabun', ui-sans-serif, system-ui, sans-serif;
+
+    --color-primary: #18181b;
+    --color-primary-light: #f4f4f5;
+    --color-accent: #3b82f6;
+    --color-success: #22c55e;
+    --color-danger: #ef4444;
+    --color-warning: #f59e0b;
+}

@@ -1,0 +1,31 @@
+{
+  "projects": [
+    {
+      "name": "Laravel Portfolio CMS",
+      "slug": "laravel-portfolio-cms",
+      "type": "website",
+      "status": "live",
+      "description_th": "ระบบ portfolio CMS สำหรับจัดการโปรเจกต์ ทักษะ บริการ SEO และ resume ผ่านหน้า admin",
+      "description_en": "A portfolio CMS for managing projects, skills, services, SEO metadata, and resume links from an admin panel.",
+      "case_study_th": "สรุปปัญหา แนวทางออกแบบ สิ่งที่ทำ และผลลัพธ์ของโปรเจกต์นี้แบบกระชับ",
+      "case_study_en": "A concise case study covering the problem, design approach, implementation, and outcome.",
+      "live_demo_url": "https://tewarach-dev.me",
+      "github_url": null,
+      "image_path": null,
+      "is_featured": true,
+      "is_public": false,
+      "display_order": 10,
+      "tech_stack": ["Laravel", "Blade", "Tailwind CSS", "Alpine.js", "MySQL"],
+      "features": [
+        {
+          "th": "จัดการ project cards และ case studies จากหลังบ้าน",
+          "en": "Manage project cards and case studies from the admin panel"
+        },
+        {
+          "th": "รองรับภาษาไทยและอังกฤษสำหรับเนื้อหาหลัก",
+          "en": "Supports Thai and English content for key portfolio sections"
+        }
+      ]
+    }
+  ]
+}
