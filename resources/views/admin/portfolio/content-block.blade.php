@@ -107,7 +107,12 @@
     @endif
 
     @if($blockKey === 'deployment')
-        <section class="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+        @php($nodesText = collect($settings['nodes'] ?? [])->map(fn ($node) => ($node['layer'] ?? '') . ' | ' . ($node['name'] ?? '') . ' | ' . ($node['note'] ?? ''))->implode("\n"))
+        <section class="grid gap-5 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+            <label class="block">
+                <span class="mb-1.5 block text-sm font-medium">{{ __('messages.deployment_nodes') }}</span>
+                <textarea name="deployment_nodes" rows="6" placeholder="Layer | Name | Note" class="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-800">{{ old('deployment_nodes', $nodesText) }}</textarea>
+            </label>
             <label class="block">
                 <span class="mb-1.5 block text-sm font-medium">{{ __('messages.deployment_steps') }}</span>
                 <textarea name="deployment_steps" rows="5" class="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-800">{{ old('deployment_steps', implode("\n", $settings['steps'] ?? [])) }}</textarea>

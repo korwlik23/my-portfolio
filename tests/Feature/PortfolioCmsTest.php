@@ -3,31 +3,37 @@
 namespace Tests\Feature;
 
 use App\Models\ContentBlock;
+use App\Models\Experience;
 use App\Models\Link;
 use App\Models\Project;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Database\Seeders\PortfolioSeeder;
+use Database\Seeders\ResumeSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\ResumeFixture;
 use Tests\TestCase;
 
 class PortfolioCmsTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, ResumeFixture;
 
     public function test_public_portfolio_renders_seeded_content(): void
     {
         $this->seed(PortfolioSeeder::class);
+        (new ResumeSeeder)->run($this->resumeFixture());
 
         $response = $this
             ->get('/')
             ->assertOk()
-            ->assertSee('Fullstack Developer for Practical Web Systems')
+            ->assertSee('Fullstack Developer for <em>Practical</em> Web Systems', false)
             ->assertSee('View Live Projects')
+            ->assertSee('href="#projects"', false)
+            ->assertSee('id="projects"', false)
             ->assertSee('Quick Facts')
             ->assertSee('Core Stack Highlight')
             ->assertSee('Laravel Admin Starter')
@@ -40,11 +46,118 @@ class PortfolioCmsTest extends TestCase
             ->assertSee('MySQL / MariaDB Databases')
             ->assertSee('OpenAI Codex')
             ->assertSee('Postman')
-            ->assertDontSee('messages.skills');
+            ->assertSee('Integration')
+            ->assertDontSee('messages.');
 
         $this->assertSame(1, substr_count($response->getContent(), 'data-portfolio-navbar'));
         $this->assertStringNotContainsString('hello@example.com', $response->getContent());
         $this->assertStringNotContainsString('https://github.com/', $response->getContent());
+    }
+
+    public function test_public_portfolio_renders_work_history_from_resume_data(): void
+    {
+        $this->seed(PortfolioSeeder::class);
+        (new ResumeSeeder)->run($this->resumeFixture());
+
+        $this
+            ->get('/')
+            ->assertOk()
+            ->assertSee('Acme Co')
+            ->assertSee('Jun 2023 – Jun 2026')
+            ->assertSee('3 yrs 1 mo')
+            ->assertSee('Built the back office.')
+            ->assertSee('Wrote the exam API.')
+            ->assertSee('3.5 yrs · since 2020')
+            ->assertSee('B.Sc. Computer Science')
+            ->assertSee('2017 – 2022')
+            ->assertSee('Cloud Demo Deployment')
+            ->assertSee('BKK · UTC+07:00')
+            ->assertSee('"name": "Test Person"', false)
+            ->assertSee('"jobTitle": "Full-Stack Web Developer"', false)
+            ->assertSee('"name": "Test University"', false);
+    }
+
+    public function test_public_portfolio_renders_work_history_in_thai(): void
+    {
+        $this->seed(PortfolioSeeder::class);
+        (new ResumeSeeder)->run($this->resumeFixture());
+
+        $this
+            ->withSession(['locale' => 'th'])
+            ->get('/')
+            ->assertOk()
+            ->assertSee('มิ.ย. 2023 – มิ.ย. 2026')
+            ->assertSee('3 ปี 1 เดือน')
+            ->assertSee('สร้างระบบหลังบ้าน')
+            ->assertSee('3.5 ปี · ตั้งแต่ 2020')
+            ->assertSee('นักพัฒนาเว็บ full-stack');
+    }
+
+    public function test_admin_can_save_experience_with_kind_and_dates(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $this
+            ->actingAs($admin)
+            ->post('/admin/portfolio/experiences', [
+                'kind' => 'education',
+                'title_th' => 'ปริญญาตรี',
+                'title_en' => 'B.Sc.',
+                'company' => 'Test University',
+                'started_on' => '2017-06-01',
+                'ended_on' => '2022-03-01',
+                'is_active' => '1',
+            ])
+            ->assertRedirect('/admin/portfolio/experiences');
+
+        $degree = Experience::query()->where('title_en', 'B.Sc.')->firstOrFail();
+        $this->assertSame('education', $degree->kind);
+        $this->assertSame('2022-03-01', $degree->ended_on->toDateString());
+
+        $this
+            ->actingAs($admin)
+            ->post('/admin/portfolio/experiences', [
+                'kind' => 'work',
+                'title_th' => 'x',
+                'title_en' => 'Backwards',
+                'started_on' => '2024-01-01',
+                'ended_on' => '2023-01-01',
+            ])
+            ->assertSessionHasErrors('ended_on');
+    }
+
+    public function test_admin_can_save_integration_skill_and_deployment_nodes(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+        (new ResumeSeeder)->run($this->resumeFixture());
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $this
+            ->actingAs($admin)
+            ->post('/admin/portfolio/skills', ['name' => 'Zapier', 'category' => 'Integration', 'level' => 'basic', 'is_active' => '1'])
+            ->assertRedirect('/admin/portfolio/skills');
+
+        $this
+            ->actingAs($admin)
+            ->put('/admin/portfolio/content/deployment', [
+                'title_en' => 'Deploy',
+                'deployment_steps' => "Docker\nTraefik",
+                'deployment_nodes' => "edge | Cloudflare DNS | proxied\nproxy | Traefik |\n | \n",
+                'is_active' => '1',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $settings = ContentBlock::query()->where('key', 'deployment')->value('settings');
+        $this->assertSame([
+            ['layer' => 'edge', 'name' => 'Cloudflare DNS', 'note' => 'proxied'],
+            ['layer' => 'proxy', 'name' => 'Traefik', 'note' => ''],
+        ], $settings['nodes']);
+        $this->assertSame(['Docker', 'Traefik'], $settings['steps']);
     }
 
     public function test_portfolio_admin_requires_permission(): void

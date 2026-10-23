@@ -144,6 +144,7 @@ class PortfolioController extends Controller
             'quick_facts_en' => ['nullable', 'string'],
             'years_experience' => ['nullable', 'string', 'max:50'],
             'deployment_steps' => ['nullable', 'string'],
+            'deployment_nodes' => ['nullable', 'string'],
         ]);
 
         $model = ContentBlock::query()->firstOrCreate(['key' => $block]);
@@ -156,7 +157,7 @@ class PortfolioController extends Controller
 
         $data['settings'] = $this->blockSettings($block, $data);
         $data['is_active'] = $request->has('is_active');
-        unset($data['image'], $data['availability'], $data['stats'], $data['highlights_th'], $data['highlights_en'], $data['quick_facts_th'], $data['quick_facts_en'], $data['years_experience'], $data['deployment_steps']);
+        unset($data['image'], $data['availability'], $data['stats'], $data['highlights_th'], $data['highlights_en'], $data['quick_facts_th'], $data['quick_facts_en'], $data['years_experience'], $data['deployment_steps'], $data['deployment_nodes']);
 
         $model->update($data);
         $this->auditLogger->log('portfolio.block.updated', $model, "Updated portfolio block: {$block}");
@@ -340,7 +341,7 @@ class PortfolioController extends Controller
                 'model' => Skill::class,
                 'name_field' => 'name',
                 'filters' => [
-                    'category' => ['Backend', 'Frontend', 'Database', 'DevOps', 'Product', 'Tools', 'AI'],
+                    'category' => Skill::CATEGORIES,
                     'level' => ['basic', 'intermediate', 'advanced'],
                     'is_active' => [1 => __('messages.yes'), 0 => __('messages.no')],
                 ],
@@ -356,7 +357,10 @@ class PortfolioController extends Controller
                 'title' => __('messages.experience'),
                 'model' => Experience::class,
                 'name_field' => 'title_en',
-                'fields' => ['title_th', 'title_en', 'company', 'period', 'description_th', 'description_en', 'tech_stack', 'display_order', 'is_active'],
+                'select_options' => [
+                    'kind' => collect(Experience::KINDS)->mapWithKeys(fn (string $kind) => [$kind => __("messages.kind_{$kind}")])->all(),
+                ],
+                'fields' => ['kind', 'title_th', 'title_en', 'company', 'started_on', 'ended_on', 'period', 'description_th', 'description_en', 'tech_stack', 'display_order', 'is_active'],
             ],
             'links' => [
                 'title' => __('messages.contact_links'),
@@ -412,7 +416,7 @@ class PortfolioController extends Controller
             ],
             'skills' => [
                 'name' => ['required', 'string', 'max:255'],
-                'category' => ['required', Rule::in(['Backend', 'Frontend', 'Database', 'DevOps', 'Product', 'Tools', 'AI'])],
+                'category' => ['required', Rule::in(Skill::CATEGORIES)],
                 'level' => ['required', Rule::in(['basic', 'intermediate', 'advanced'])],
                 'icon' => ['nullable', 'string', 'max:120'],
                 'display_order' => ['nullable', 'integer', 'min:0'],
@@ -428,9 +432,12 @@ class PortfolioController extends Controller
                 'display_order' => ['nullable', 'integer', 'min:0'],
             ],
             'experiences' => [
+                'kind' => ['required', Rule::in(Experience::KINDS)],
                 'title_th' => ['required', 'string', 'max:255'],
                 'title_en' => ['required', 'string', 'max:255'],
                 'company' => ['nullable', 'string', 'max:255'],
+                'started_on' => ['nullable', 'date'],
+                'ended_on' => ['nullable', 'date', 'after_or_equal:started_on'],
                 'period' => ['nullable', 'string', 'max:255'],
                 'description_th' => ['nullable', 'string'],
                 'description_en' => ['nullable', 'string'],
@@ -575,6 +582,15 @@ class PortfolioController extends Controller
             ],
             'deployment' => [
                 'steps' => $this->lines($data['deployment_steps'] ?? ''),
+                'nodes' => collect($this->lines($data['deployment_nodes'] ?? ''))
+                    ->map(function (string $line) {
+                        [$layer, $name, $note] = array_pad(array_map('trim', explode('|', $line)), 3, '');
+
+                        return $name !== '' ? ['layer' => $layer, 'name' => $name, 'note' => $note] : null;
+                    })
+                    ->filter()
+                    ->values()
+                    ->all(),
             ],
             default => [],
         };

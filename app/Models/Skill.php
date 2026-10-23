@@ -9,6 +9,8 @@ class Skill extends Model
 {
     use SoftDeletes;
 
+    public const CATEGORIES = ['Backend', 'Frontend', 'Database', 'DevOps', 'Integration', 'Product', 'Tools', 'AI'];
+
     protected $fillable = ['name', 'category', 'level', 'icon', 'display_order', 'is_active'];
 
     protected $casts = [

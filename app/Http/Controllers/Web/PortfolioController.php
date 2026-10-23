@@ -39,6 +39,8 @@ class PortfolioController extends Controller
             ->limit(6)
             ->get();
 
+        $experiences = Experience::query()->active()->ordered()->get();
+
         return view('portfolio.home', [
             'settings' => $settings,
             'locale' => $locale,
@@ -49,7 +51,8 @@ class PortfolioController extends Controller
             'starters' => Starter::query()->public()->ordered()->limit(8)->get(),
             'skillsByCategory' => Skill::query()->active()->ordered()->get()->groupBy('category'),
             'services' => Service::query()->active()->ordered()->get(),
-            'experiences' => Experience::query()->active()->ordered()->get(),
+            'experiences' => $experiences,
+            'career' => Experience::careerSummary($experiences),
             'links' => Link::query()->active()->ordered()->get(),
             'seo' => SeoSetting::query()->where('page_key', 'home')->first(),
             'resumeUrls' => $this->resumeUrls($settings),

@@ -195,6 +195,7 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
 .portfolio-page .pf-nav-links { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
 .portfolio-page .pf-nav-links a { color: var(--ink-mute); transition: color .15s; }
 .portfolio-page .pf-nav-links a:hover,
+.portfolio-page .pf-nav-links a.is-current,
 .portfolio-page .pf-nav-links a.pf-admin { color: var(--ink); }
 .portfolio-page .pf-nav-links .pf-sep { color: var(--ink-fade); }
 .portfolio-page .pf-pill {
@@ -416,7 +417,9 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     color: var(--ink-mute);
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    text-align: right;
 }
+.portfolio-page .pf-section-head--flush { padding-top: 0; }
 
 /* ———— About ———— */
 .portfolio-page .pf-about { padding-block: 36px 72px; scroll-margin-top: 64px; }
@@ -444,6 +447,7 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
 .portfolio-page .pf-portrait img {
     width: 100%; height: 100%; object-fit: cover;
 }
+.portfolio-page .pf-portrait-placeholder { width: 68%; height: auto; opacity: .45; }
 .portfolio-page .pf-portrait::after {
     content: "";
     position: absolute;
@@ -584,16 +588,23 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     max-width: 60ch;
     margin: 0 0 14px;
 }
-.portfolio-page .pf-entry .pf-stack {
+.portfolio-page .pf-stack {
     display: flex; flex-wrap: wrap; gap: 6px 14px;
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--ink-mute);
 }
-.portfolio-page .pf-entry .pf-stack span::before {
+.portfolio-page .pf-stack span::before {
     content: "·"; margin-right: 10px; color: var(--ink-fade);
 }
-.portfolio-page .pf-entry .pf-stack span:first-child::before { display: none; }
+.portfolio-page .pf-stack span:first-child::before { display: none; }
+.portfolio-page .pf-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border: 1px solid var(--rule-strong);
+    margin-bottom: 12px;
+}
 .portfolio-page .pf-entry .pf-meta {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -656,16 +667,17 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
 .portfolio-page .pf-entry details[open] .pf-case-summary { color: var(--accent); border-color: var(--accent); }
 .portfolio-page .pf-entry details .pf-case-summary::-webkit-details-marker { display: none; }
 
-/* ———— Starters ———— */
-.portfolio-page .pf-starters-head {
+/* ———— Sub-heading inside a section ———— */
+.portfolio-page .pf-subhead {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
+    gap: 16px;
     margin-top: 56px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--rule-strong);
 }
-.portfolio-page .pf-starters-head h3 {
+.portfolio-page .pf-subhead h3 {
     font-family: var(--font-display);
     font-size: 1.4rem;
     font-weight: 700;
@@ -673,7 +685,7 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     letter-spacing: -0.015em;
     color: var(--ink);
 }
-.portfolio-page .pf-starters-head span {
+.portfolio-page .pf-subhead span {
     font-family: var(--font-mono);
     font-size: 10.5px;
     color: var(--ink-mute);
@@ -741,15 +753,11 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     color: var(--ink-mute);
 }
 .portfolio-page .pf-core .pf-v {
-    display: flex; flex-wrap: wrap; gap: 12px 20px;
+    display: flex; flex-wrap: wrap; gap: 10px 28px;
     font-family: var(--font-sans);
     font-weight: 500;
     font-size: 15px;
     letter-spacing: -0.005em;
-}
-.portfolio-page .pf-core .pf-v span { display: inline-flex; align-items: center; gap: 10px; }
-.portfolio-page .pf-core .pf-v span + span::before {
-    content: "·"; color: var(--ink-fade); margin-right: 20px;
 }
 .portfolio-page .pf-skill-grid {
     margin-top: 44px;
@@ -779,7 +787,18 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     padding: 4px 0;
     font-size: 14px;
     letter-spacing: -0.005em;
-    color: var(--ink);
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-skill-cell li.is-core { color: var(--ink); font-weight: 500; }
+.portfolio-page .pf-skill-cell li.is-core::after {
+    content: "";
+    display: inline-block;
+    width: 5px; height: 5px;
+    margin-left: 8px;
+    vertical-align: 2px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px color-mix(in oklab, var(--accent) 70%, transparent);
 }
 
 /* ———— Services ———— */
@@ -820,58 +839,150 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     max-width: 52ch;
 }
 
-/* ———— Experience ———— */
+/* ———— Experience: timeline ———— */
 .portfolio-page .pf-exp { padding-block: 24px 72px; scroll-margin-top: 64px; }
-.portfolio-page .pf-exp-list { margin-top: 24px; }
-.portfolio-page .pf-exp-row {
-    display: grid;
-    grid-template-columns: 160px 1fr 180px;
-    gap: 32px;
-    padding-block: 32px;
-    border-bottom: 1px solid var(--rule);
+.portfolio-page .pf-exp .pf-subhead:first-of-type { margin-top: 32px; }
+.portfolio-page .pf-timeline {
+    --tl-when: 180px;
+    --tl-gap: 48px;
+    list-style: none;
+    margin: 0;
+    padding: 8px 0 0;
     position: relative;
 }
-.portfolio-page .pf-exp-row .pf-year {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    position: relative;
-}
-.portfolio-page .pf-exp-row .pf-year::after {
+.portfolio-page .pf-timeline::before {
     content: "";
     position: absolute;
-    right: -17px; top: 6px;
-    width: 9px; height: 9px;
+    top: 0; bottom: 0;
+    left: calc(var(--tl-when) + var(--tl-gap) / 2);
+    width: 1px;
+    background: linear-gradient(to bottom, var(--rule-strong), var(--rule-strong) 85%, transparent);
+}
+.portfolio-page .pf-tl-row {
+    display: grid;
+    grid-template-columns: var(--tl-when) 1fr;
+    gap: var(--tl-gap);
+    padding-block: 28px;
+    position: relative;
+}
+.portfolio-page .pf-tl-row + .pf-tl-row { border-top: 1px solid var(--rule); }
+.portfolio-page .pf-tl-row::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--tl-when) + var(--tl-gap) / 2 - 5px);
+    top: 34px;
+    width: 11px; height: 11px;
     border-radius: 50%;
     background: var(--paper);
     border: 1.5px solid var(--accent);
+    z-index: 1;
 }
-.portfolio-page .pf-exp-row h3 {
+.portfolio-page .pf-tl-row.is-current::before {
+    background: var(--signal);
+    border-color: var(--signal);
+    animation: pf-pulse 2.2s ease-in-out infinite;
+}
+.portfolio-page .pf-tl-row.is-education::before {
+    border-radius: 0;
+    border-color: var(--signal);
+    transform: rotate(45deg);
+}
+.portfolio-page .pf-tl-when {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 6px;
+    text-align: right;
+}
+.portfolio-page .pf-tl-period {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+.portfolio-page .pf-tl-duration {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-fade);
+}
+.portfolio-page .pf-tl-org {
+    margin: 0 0 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.portfolio-page .pf-tl-body h3 {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.35rem;
-    margin: 0 0 10px;
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+    margin: 0 0 14px;
     letter-spacing: -0.015em;
     line-height: 1.1;
     color: var(--ink);
 }
-.portfolio-page .pf-exp-row p {
+.portfolio-page .pf-tl-points {
+    list-style: none;
+    margin: 0 0 14px;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+    max-width: 68ch;
+}
+.portfolio-page .pf-tl-points li {
+    position: relative;
+    padding-left: 22px;
+    color: var(--ink-mute);
+    font-size: 14.5px;
+    line-height: 1.6;
+}
+.portfolio-page .pf-tl-points li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--ink-fade);
+    font-family: var(--font-mono);
+}
+.portfolio-page .pf-tl-desc {
+    margin: 0 0 14px;
+    max-width: 68ch;
+    color: var(--ink-mute);
+    font-size: 14.5px;
+    line-height: 1.6;
+}
+
+/* ———— Experience: portfolio highlights ———— */
+.portfolio-page .pf-hl {
+    display: grid;
+    grid-template-columns: 56px 260px 1fr;
+    gap: 24px;
+    align-items: baseline;
+    padding-block: 20px;
+    border-bottom: 1px solid var(--rule);
+}
+.portfolio-page .pf-hl .pf-idx {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-fade);
+}
+.portfolio-page .pf-hl h4 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+}
+.portfolio-page .pf-hl p {
+    margin: 0 0 8px;
     color: var(--ink-mute);
     font-size: 14px;
-    line-height: 1.6;
-    max-width: 60ch;
-    margin: 0;
-}
-.portfolio-page .pf-exp-row .pf-tag {
-    justify-self: end;
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-align: right;
+    line-height: 1.55;
+    max-width: 64ch;
 }
 
 /* ———— Deployment schematic ———— */
@@ -923,10 +1034,14 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
 }
 .portfolio-page .pf-flow {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 0;
     align-items: stretch;
     position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 .portfolio-page .pf-node {
     border: 1px solid color-mix(in oklab, var(--ink) 15%, transparent);
@@ -1164,6 +1279,7 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
 
 /* ———— Responsive ———— */
 @media (max-width: 960px) {
+    .portfolio-page .pf-brand span { display: none; }
     .portfolio-page .pf-hero-grid { grid-template-columns: 1fr; gap: 36px; }
     .portfolio-page .pf-about-grid { grid-template-columns: 1fr; gap: 32px; }
     .portfolio-page .pf-portrait { max-width: 320px; }
@@ -1181,10 +1297,14 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     .portfolio-page .pf-entry .pf-actions { grid-column: 2; }
     .portfolio-page .pf-svc { grid-template-columns: 36px 1fr; }
     .portfolio-page .pf-svc .pf-d { grid-column: 2; }
-    .portfolio-page .pf-exp-row { grid-template-columns: 1fr; gap: 12px; }
-    .portfolio-page .pf-exp-row .pf-year::after { display: none; }
-    .portfolio-page .pf-exp-row .pf-tag { justify-self: start; text-align: left; }
-    .portfolio-page .pf-flow { grid-template-columns: 1fr; }
+    .portfolio-page .pf-timeline::before { left: 5px; }
+    .portfolio-page .pf-tl-row { grid-template-columns: 1fr; gap: 8px; padding-left: 32px; }
+    .portfolio-page .pf-tl-row::before { left: 0; top: 32px; }
+    .portfolio-page .pf-tl-when { flex-direction: row; flex-wrap: wrap; gap: 4px 12px; text-align: left; padding-top: 0; }
+    .portfolio-page .pf-hl { grid-template-columns: 36px 1fr; gap: 6px 12px; }
+    .portfolio-page .pf-hl > div { grid-column: 2; }
+    .portfolio-page .pf-flow { grid-auto-flow: row; grid-auto-columns: auto; }
+    .portfolio-page .pf-thumb { max-width: 320px; }
     .portfolio-page .pf-node:not(:last-child) { border-right: 1px solid color-mix(in oklab, var(--ink) 15%, transparent); border-bottom: 0; }
     .portfolio-page .pf-arrow { right: 50%; top: auto; bottom: -8px; transform: translateX(50%); }
     .portfolio-page .pf-contact-grid { grid-template-columns: 1fr; gap: 32px; }
@@ -1199,6 +1319,10 @@ body.portfolio-page button { font: inherit; color: inherit; background: none; bo
     .portfolio-page .pf-section-head .pf-right { grid-column: 1 / -1; }
     .portfolio-page .pf-core { grid-template-columns: 1fr; gap: 12px; }
     .portfolio-page .pf-status-row { gap: 10px 14px; font-size: 10.5px; }
+}
+
+@media (max-width: 720px) {
+    .portfolio-page .pf-nav-links .pf-nav-section { display: none; }
 }
 
 @media (max-width: 560px) {

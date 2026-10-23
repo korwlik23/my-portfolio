@@ -3,13 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\ContentBlock;
-use App\Models\Experience;
 use App\Models\Link;
 use App\Models\Project;
 use App\Models\SeoSetting;
-use App\Models\Service;
 use App\Models\SiteSetting;
-use App\Models\Skill;
 use App\Models\Starter;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -22,9 +19,6 @@ class PortfolioSeeder extends Seeder
         $this->contentBlocks();
         $this->projects();
         $this->starters();
-        $this->skills();
-        $this->services();
-        $this->experiences();
         $this->links();
         $this->seo();
     }
@@ -125,9 +119,6 @@ class PortfolioSeeder extends Seeder
             'subtitle_th' => 'สามารถ deploy หลายโปรเจกต์ Laravel และ Next.js บน Azure VM เครื่องเดียว โดยใช้ Nginx reverse proxy, PHP-FPM, PM2, MySQL/MariaDB, SSL และ Cloudflare DNS',
             'body_en' => 'The architecture uses Cloudflare for DNS, Nginx as the entry point, PHP-FPM for Laravel apps, PM2 for Node/Next.js apps, and one MySQL/MariaDB server with separate databases per project.',
             'body_th' => 'โครงสร้างใช้ Cloudflare สำหรับ DNS, Nginx เป็น entry point, PHP-FPM สำหรับ Laravel, PM2 สำหรับ Node/Next.js และ MySQL/MariaDB server เดียวพร้อมแยก database ตามโปรเจกต์',
-            'settings' => [
-                'steps' => ['Cloudflare DNS', 'Azure VM', 'Nginx Reverse Proxy', 'Laravel Apps / Next.js Apps', 'PHP-FPM / PM2', 'MySQL / MariaDB Databases', 'SSL / Certbot'],
-            ],
             'is_active' => true,
             'display_order' => 9,
         ]);
@@ -200,76 +191,6 @@ class PortfolioSeeder extends Seeder
                 'deploy_notes_th' => 'สามารถ deploy ผ่าน Nginx ร่วมกับ PHP-FPM หรือ PM2 ตาม stack ของโปรเจกต์',
                 'is_public' => true,
                 'display_order' => $order++,
-            ]);
-        }
-    }
-
-    private function skills(): void
-    {
-        $skills = [
-            'Backend' => ['Laravel', 'PHP', 'REST API', 'Authentication', 'Role / Permission', 'Payment Workflow'],
-            'Frontend' => ['Next.js', 'Svelte / Vite', 'Tailwind CSS', 'Responsive UI', 'Theme System', 'Multi-language UI'],
-            'Database' => ['MySQL', 'MariaDB', 'PostgreSQL / Supabase', 'Migration', 'Seeder', 'Database Design'],
-            'DevOps' => ['Azure VM', 'Cloudflare', 'VPS', 'Nginx', 'PHP-FPM', 'PM2', 'SSL / Certbot', 'Git / GitHub'],
-            'Product' => ['SaaS Architecture', 'Admin Dashboard', 'Business Workflow', 'System Specification', 'Project Roadmap'],
-            'Tools' => ['VS Code', 'Composer', 'npm', 'Vite', 'Postman', 'phpMyAdmin', 'GitHub Actions'],
-            'AI' => ['ChatGPT', 'OpenAI Codex', 'GitHub Copilot', 'Cursor', 'Claude', 'Gemini'],
-        ];
-
-        $order = 1;
-        foreach ($skills as $category => $items) {
-            foreach ($items as $item) {
-                Skill::query()->updateOrCreate(['name' => $item], [
-                    'category' => $category,
-                    'level' => in_array($item, ['Laravel', 'PHP', 'MySQL', 'Tailwind CSS', 'Admin Dashboard'], true) ? 'advanced' : 'intermediate',
-                    'display_order' => $order++,
-                    'is_active' => true,
-                ]);
-            }
-        }
-    }
-
-    private function services(): void
-    {
-        $services = [
-            ['Web Application Development', 'พัฒนาเว็บแอปพลิเคชัน', 'Custom business web apps, admin dashboards, and operational systems.', 'พัฒนาเว็บแอป ระบบหลังบ้าน และระบบ workflow สำหรับธุรกิจ'],
-            ['Laravel Development', 'พัฒนา Laravel', 'Laravel backend, auth, permissions, CRUD systems, APIs, and dashboards.', 'พัฒนา Laravel backend, auth, permissions, CRUD, API และ dashboard'],
-            ['Frontend Development', 'พัฒนา Frontend', 'Responsive Blade, Tailwind, Next.js, and Svelte/Vite interfaces.', 'พัฒนา UI responsive ด้วย Blade, Tailwind, Next.js และ Svelte/Vite'],
-            ['Deployment & Server Setup', 'ติดตั้งและ Deploy ระบบ', 'Azure VM, Nginx, PHP-FPM, PM2, SSL, and Cloudflare DNS setup.', 'ตั้งค่า Azure VM, Nginx, PHP-FPM, PM2, SSL และ Cloudflare DNS'],
-            ['Bug Fixing & System Improvement', 'แก้บั๊กและปรับปรุงระบบ', 'Debugging, refactoring, performance fixes, and security improvements.', 'แก้บั๊ก refactor ปรับ performance และเพิ่มความปลอดภัย'],
-            ['SaaS / MVP Starter Development', 'พัฒนา SaaS / MVP Starter', 'Starter systems for validating products quickly with clean admin foundations.', 'พัฒนา starter สำหรับทดลองสินค้าอย่างรวดเร็วพร้อมฐาน admin ที่สะอาด'],
-        ];
-
-        foreach ($services as $index => [$titleEn, $titleTh, $descriptionEn, $descriptionTh]) {
-            Service::query()->updateOrCreate(['title_en' => $titleEn], [
-                'title_th' => $titleTh,
-                'description_en' => $descriptionEn,
-                'description_th' => $descriptionTh,
-                'price_range' => null,
-                'is_active' => true,
-                'display_order' => $index + 1,
-            ]);
-        }
-    }
-
-    private function experiences(): void
-    {
-        $items = [
-            ['Laravel Admin & CMS Systems', 'ระบบ Laravel Admin และ CMS', 'Built reusable admin foundations with authentication, roles, settings, translations, and audit trails.', 'สร้างฐานระบบ admin ที่นำกลับมาใช้ได้ พร้อม authentication, roles, settings, translations และ audit trails', ['Laravel', 'Spatie Permission', 'Tailwind CSS']],
-            ['SaaS Starter Planning', 'วางแผน SaaS Starter', 'Designed practical starter systems for accounting, restaurant, school, and fullstack SaaS workflows.', 'ออกแบบ starter สำหรับ accounting, restaurant, school และ fullstack SaaS workflow', ['Laravel', 'MySQL', 'Product Roadmap']],
-            ['Cloud Demo Deployment', 'Deploy Demo บน Cloud', 'Planned multi-project deployment with subdomains, reverse proxy, SSL, PHP-FPM, PM2, and shared database infrastructure.', 'วางแผน deploy หลายโปรเจกต์ด้วย subdomain, reverse proxy, SSL, PHP-FPM, PM2 และ database infrastructure ร่วมกัน', ['Azure VM', 'Nginx', 'Cloudflare']],
-        ];
-
-        foreach ($items as $index => [$titleEn, $titleTh, $descriptionEn, $descriptionTh, $stack]) {
-            Experience::query()->updateOrCreate(['title_en' => $titleEn], [
-                'title_th' => $titleTh,
-                'company' => null,
-                'period' => 'Portfolio highlight',
-                'description_en' => $descriptionEn,
-                'description_th' => $descriptionTh,
-                'tech_stack' => $stack,
-                'display_order' => $index + 1,
-                'is_active' => true,
             ]);
         }
     }

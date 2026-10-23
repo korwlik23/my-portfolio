@@ -8,8 +8,9 @@
 
     $textareaFields = ['description_th', 'description_en', 'case_study_th', 'case_study_en', 'setup_notes_th', 'setup_notes_en', 'deploy_notes_th', 'deploy_notes_en', 'feature_list_th', 'feature_list_en', 'stack', 'tech_stack', 'tech_stack_tags'];
     $checkboxFields = ['is_active', 'is_public', 'is_featured'];
+    $dateFields = ['started_on', 'ended_on'];
     $selectOptions = [
-        'category' => ['Backend', 'Frontend', 'Database', 'DevOps', 'Product', 'Tools', 'AI'],
+        'category' => \App\Models\Skill::CATEGORIES,
         'level' => ['basic', 'intermediate', 'advanced'],
     ];
     $selectOptions = array_replace($selectOptions, $config['select_options'] ?? []);
@@ -41,6 +42,11 @@
                 <label class="flex items-center gap-3 rounded-lg border border-zinc-200 p-4 text-sm font-medium dark:border-zinc-800">
                     <input type="checkbox" name="{{ $field }}" value="1" @checked(old($field, $item->{$field} ?? true))>
                     {{ $label }}
+                </label>
+            @elseif(in_array($field, $dateFields, true))
+                <label class="block">
+                    <span class="mb-1.5 block text-sm font-medium">{{ $label }}</span>
+                    <input type="date" name="{{ $field }}" value="{{ $value instanceof \DateTimeInterface ? $value->format('Y-m-d') : $value }}" class="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-800">
                 </label>
             @elseif($field === 'image')
                 <label class="block">
