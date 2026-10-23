@@ -42,3 +42,1171 @@ html.large-text.dark #large-text-toggle {
     --color-danger: #ef4444;
     --color-warning: #f59e0b;
 }
+
+/* ================================================================
+   Portfolio home — Dark + EDM editorial design
+   Scoped under body.portfolio-page so admin/other pages untouched.
+   ================================================================ */
+
+body.portfolio-page {
+    --paper: #0a0a0c;
+    --paper-2: #111117;
+    --surface: #16161e;
+    --ink: #ebe9e2;
+    --ink-mute: #8b8a94;
+    --ink-fade: #4e4e58;
+    --rule: #22222d;
+    --rule-strong: #383841;
+    --accent: #ff2d7a;
+    --accent-on: #0a0a0c;
+    --signal: #00e5ff;
+    --mark: #00e5ff;
+    --mark-ink: #06060a;
+    --grid: rgba(255, 255, 255, 0.04);
+    --glow-a: #ff2d7a;
+    --glow-b: #00e5ff;
+
+    --font-sans: 'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    color-scheme: dark;
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01" on, "cv11" on;
+    background:
+        radial-gradient(ellipse 60% 50% at 18% -5%, color-mix(in oklab, var(--glow-a) 18%, transparent), transparent 55%),
+        radial-gradient(ellipse 55% 45% at 92% 12%, color-mix(in oklab, var(--glow-b) 14%, transparent), transparent 55%),
+        var(--paper);
+    background-attachment: fixed;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+body.portfolio-page * { box-sizing: border-box; }
+body.portfolio-page a { color: inherit; text-decoration: none; }
+body.portfolio-page img { max-width: 100%; display: block; }
+body.portfolio-page button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+
+.portfolio-page .pf-wrap { max-width: 1180px; margin: 0 auto; }
+.portfolio-page .pf-mono { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.02em; }
+
+.portfolio-page .pf-skip {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+}
+.portfolio-page .pf-skip:focus {
+    left: 16px; top: 16px;
+    z-index: 100;
+    background: var(--accent);
+    color: var(--accent-on);
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+}
+
+.portfolio-page .pf-dot {
+    display: inline-block;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 30%, transparent);
+    vertical-align: 1px;
+}
+.portfolio-page .pf-dot.ok {
+    background: var(--signal);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--signal) 35%, transparent), 0 0 10px color-mix(in oklab, var(--signal) 60%, transparent);
+    animation: pf-pulse 2.2s ease-in-out infinite;
+}
+.portfolio-page .pf-dot.wait {
+    background: #f5b000;
+    box-shadow: 0 0 0 3px color-mix(in oklab, #f5b000 30%, transparent);
+}
+@keyframes pf-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--signal) 35%, transparent), 0 0 10px color-mix(in oklab, var(--signal) 55%, transparent); }
+    50%      { box-shadow: 0 0 0 5px color-mix(in oklab, var(--signal) 18%, transparent), 0 0 18px color-mix(in oklab, var(--signal) 85%, transparent); }
+}
+
+.portfolio-page .pf-eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 11px;
+    vertical-align: -1px;
+    margin-left: 2px;
+}
+.portfolio-page .pf-eq i {
+    display: block;
+    width: 2px;
+    height: 100%;
+    background: var(--signal);
+    border-radius: 1px;
+    transform-origin: bottom;
+    animation: pf-eq 1.1s ease-in-out infinite;
+    box-shadow: 0 0 4px color-mix(in oklab, var(--signal) 70%, transparent);
+}
+.portfolio-page .pf-eq i:nth-child(1) { animation-delay: 0s; }
+.portfolio-page .pf-eq i:nth-child(2) { animation-delay: .18s; background: var(--accent); box-shadow: 0 0 4px color-mix(in oklab, var(--accent) 70%, transparent); }
+.portfolio-page .pf-eq i:nth-child(3) { animation-delay: .35s; }
+.portfolio-page .pf-eq i:nth-child(4) { animation-delay: .52s; background: var(--accent); box-shadow: 0 0 4px color-mix(in oklab, var(--accent) 70%, transparent); }
+.portfolio-page .pf-eq i:nth-child(5) { animation-delay: .68s; }
+@keyframes pf-eq {
+    0%, 100% { transform: scaleY(0.25); }
+    50%      { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .portfolio-page .pf-dot.ok,
+    .portfolio-page .pf-eq i { animation: none; }
+    .portfolio-page .pf-eq i { transform: scaleY(0.5); }
+    .portfolio-page .pf-ticker-track { animation: none; }
+}
+
+/* ———— Nav ———— */
+.portfolio-page .pf-nav {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 40;
+    background: color-mix(in oklab, var(--paper) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+}
+.portfolio-page .pf-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+.portfolio-page .pf-brand {
+    display: flex; align-items: baseline; gap: 10px;
+    letter-spacing: 0.02em;
+    min-width: 0;
+}
+.portfolio-page .pf-brand b { font-weight: 600; color: var(--ink); }
+.portfolio-page .pf-brand span { color: var(--ink-mute); }
+.portfolio-page .pf-nav-links { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
+.portfolio-page .pf-nav-links a { color: var(--ink-mute); transition: color .15s; }
+.portfolio-page .pf-nav-links a:hover,
+.portfolio-page .pf-nav-links a.pf-admin { color: var(--ink); }
+.portfolio-page .pf-nav-links .pf-sep { color: var(--ink-fade); }
+.portfolio-page .pf-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--rule-strong); padding: 5px 10px;
+    border-radius: 999px;
+    color: var(--ink);
+}
+.portfolio-page .pf-admin {
+    border: 1px solid var(--rule-strong);
+    padding: 6px 12px;
+    color: var(--ink);
+    transition: border-color .15s, color .15s;
+}
+.portfolio-page .pf-admin:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ———— Hero ———— */
+.portfolio-page .pf-hero {
+    padding-block: 56px 72px;
+    position: relative;
+    isolation: isolate;
+    scroll-margin-top: 64px;
+}
+.portfolio-page .pf-hero::before {
+    content: "";
+    position: absolute;
+    inset: -40px 0 0;
+    background-image:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 70% 20%, black 10%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 70% 20%, black 10%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+.portfolio-page .pf-status-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+}
+.portfolio-page .pf-status-row b { color: var(--ink); font-weight: 500; }
+.portfolio-page .pf-hero-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 48px;
+    padding-top: 36px;
+}
+.portfolio-page .pf-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 7vw, 5.75rem);
+    line-height: 0.95;
+    letter-spacing: -0.028em;
+    margin: 0 0 28px;
+    text-wrap: balance;
+}
+.portfolio-page .pf-hero h1 em {
+    font-style: normal;
+    position: relative;
+    display: inline-block;
+    color: var(--ink);
+    padding: 0 .05em;
+    z-index: 0;
+}
+.portfolio-page .pf-hero h1 em::after {
+    content: "";
+    position: absolute;
+    left: -0.02em; right: -0.02em;
+    bottom: 0.07em;
+    height: 0.42em;
+    background: linear-gradient(90deg, var(--accent), var(--signal));
+    z-index: -1;
+    opacity: 0.9;
+    filter: blur(0.5px);
+}
+.portfolio-page .pf-lede {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 50ch;
+    margin: 0 0 36px;
+}
+.portfolio-page .pf-lede-mute { color: var(--ink-mute); display: block; margin-top: 10px; font-size: 15px; }
+.portfolio-page .pf-cta-row {
+    display: flex; flex-wrap: wrap; gap: 10px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+}
+.portfolio-page .pf-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 18px;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink);
+    transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+    min-height: 42px;
+}
+.portfolio-page .pf-cta.primary {
+    background: var(--accent);
+    color: var(--accent-on);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent), 0 10px 28px -10px color-mix(in oklab, var(--accent) 75%, transparent);
+}
+.portfolio-page .pf-cta.primary:hover {
+    background: transparent;
+    color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+.portfolio-page .pf-cta.ghost:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+}
+
+.portfolio-page .pf-spec {
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+    padding: 0;
+    position: relative;
+    box-shadow: 0 24px 60px -24px color-mix(in oklab, var(--accent) 45%, transparent),
+                0 -1px 0 color-mix(in oklab, var(--signal) 30%, transparent);
+}
+.portfolio-page .pf-spec-head {
+    padding: 11px 18px;
+    background: color-mix(in oklab, var(--accent) 18%, var(--paper-2));
+    color: var(--ink);
+    border-bottom: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.portfolio-page .pf-spec-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 16px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+}
+.portfolio-page .pf-spec-row:last-child { border-bottom: 0; }
+.portfolio-page .pf-spec-row .pf-k {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-spec-row .pf-v { font-weight: 500; letter-spacing: -0.005em; min-width: 0; word-break: break-word; }
+.portfolio-page .pf-avail-value {
+    color: var(--signal);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ———— Ticker ———— */
+.portfolio-page .pf-ticker {
+    border-block: 1px solid var(--rule);
+    background: var(--paper-2);
+    overflow: hidden;
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+}
+.portfolio-page .pf-ticker-track {
+    display: flex;
+    gap: 36px;
+    padding-block: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+    white-space: nowrap;
+    animation: pf-slide 55s linear infinite;
+    width: max-content;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px));
+}
+.portfolio-page .pf-ticker-track span { display: inline-flex; align-items: center; gap: 8px; }
+.portfolio-page .pf-ticker-track span::before {
+    content: ""; width: 4px; height: 4px; background: var(--accent); border-radius: 50%;
+}
+@keyframes pf-slide {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+/* ———— Section head ———— */
+.portfolio-page .pf-section-head {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    gap: 24px;
+    align-items: baseline;
+    padding-block: 56px 24px;
+    border-bottom: 1px solid var(--rule);
+}
+.portfolio-page .pf-section-head .pf-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-section-head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 0;
+}
+.portfolio-page .pf-section-head .pf-right {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ———— About ———— */
+.portfolio-page .pf-about { padding-block: 36px 72px; scroll-margin-top: 64px; }
+.portfolio-page .pf-about-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 48px;
+}
+.portfolio-page .pf-portrait {
+    position: relative;
+    aspect-ratio: 4/5;
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    display: grid;
+    place-items: center;
+    color: var(--ink-fade);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--signal) 18%, transparent),
+                0 0 40px -10px color-mix(in oklab, var(--accent) 35%, transparent);
+}
+.portfolio-page .pf-portrait img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.portfolio-page .pf-portrait::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0,
+        transparent 3px,
+        color-mix(in oklab, var(--signal) 6%, transparent) 3px,
+        color-mix(in oklab, var(--signal) 6%, transparent) 4px
+    );
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+.portfolio-page .pf-portrait-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 10px 14px;
+    background: color-mix(in oklab, var(--paper) 86%, transparent);
+    border-top: 1px solid var(--rule);
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    z-index: 2;
+}
+.portfolio-page .pf-about-body p {
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0 0 20px;
+    max-width: 60ch;
+    color: var(--ink);
+}
+.portfolio-page .pf-about-body .pf-about-th {
+    color: var(--ink-mute);
+    font-size: 15px;
+}
+.portfolio-page .pf-highlights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    margin-top: 32px;
+}
+.portfolio-page .pf-highlights div {
+    padding: 20px;
+    padding-left: 20px;
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+}
+.portfolio-page .pf-highlights div:first-child { padding-left: 0; }
+.portfolio-page .pf-highlights div:nth-child(3n) { border-right: 0; padding-right: 0; }
+.portfolio-page .pf-highlights div::before {
+    content: "+";
+    font-family: var(--font-mono);
+    color: var(--accent);
+    margin-right: 12px;
+    display: inline-block;
+}
+.portfolio-page .pf-facts {
+    margin-top: 44px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+}
+.portfolio-page .pf-facts-head {
+    padding: 10px 18px;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--rule);
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-facts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+.portfolio-page .pf-facts-grid > div {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 16px;
+    align-items: baseline;
+}
+.portfolio-page .pf-facts-grid > div:nth-last-child(-n+2) { border-bottom: 0; }
+.portfolio-page .pf-facts-grid > div:nth-child(odd) { border-right: 1px solid var(--rule); }
+.portfolio-page .pf-facts-grid .pf-k {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-facts-grid .pf-v { font-weight: 500; min-width: 0; }
+
+/* ———— Work (projects) ———— */
+.portfolio-page .pf-work { padding-block: 24px 72px; scroll-margin-top: 64px; }
+.portfolio-page .pf-entry {
+    display: grid;
+    grid-template-columns: 56px 1fr 160px 120px;
+    gap: 24px;
+    align-items: start;
+    padding-block: 28px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+    transition: background .15s;
+}
+.portfolio-page .pf-entry:hover {
+    background: color-mix(in oklab, var(--surface) 60%, transparent);
+}
+.portfolio-page .pf-entry .pf-idx {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-fade);
+    letter-spacing: 0.08em;
+    padding-top: 4px;
+}
+.portfolio-page .pf-entry h3 {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 0 0 10px;
+    color: var(--ink);
+}
+.portfolio-page .pf-entry .pf-desc {
+    color: var(--ink-mute);
+    font-size: 14.5px;
+    line-height: 1.55;
+    max-width: 60ch;
+    margin: 0 0 14px;
+}
+.portfolio-page .pf-entry .pf-stack {
+    display: flex; flex-wrap: wrap; gap: 6px 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-entry .pf-stack span::before {
+    content: "·"; margin-right: 10px; color: var(--ink-fade);
+}
+.portfolio-page .pf-entry .pf-stack span:first-child::before { display: none; }
+.portfolio-page .pf-entry .pf-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding-top: 6px;
+}
+.portfolio-page .pf-entry .pf-meta div + div { margin-top: 6px; }
+.portfolio-page .pf-entry .pf-meta b { color: var(--ink); font-weight: 500; }
+.portfolio-page .pf-entry .pf-actions {
+    display: flex; flex-direction: column; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    padding-top: 4px;
+}
+.portfolio-page .pf-entry .pf-actions a {
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 2px;
+    width: fit-content;
+    transition: color .15s, border-color .15s;
+}
+.portfolio-page .pf-entry .pf-actions a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+.portfolio-page .pf-entry .pf-actions span { color: var(--ink-fade); }
+.portfolio-page .pf-entry .pf-lead-row {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+}
+.portfolio-page .pf-entry .pf-lead-row b { color: var(--ink); font-weight: 500; }
+.portfolio-page .pf-entry .pf-case {
+    display: block;
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: color-mix(in oklab, var(--surface) 50%, transparent);
+    border: 1px solid var(--rule);
+    color: var(--ink-mute);
+    font-size: 13.5px;
+    line-height: 1.6;
+    cursor: pointer;
+    width: fit-content;
+}
+.portfolio-page .pf-entry details .pf-case-summary {
+    list-style: none;
+    cursor: pointer;
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 2px;
+    width: fit-content;
+    display: inline-block;
+}
+.portfolio-page .pf-entry details[open] .pf-case-summary { color: var(--accent); border-color: var(--accent); }
+.portfolio-page .pf-entry details .pf-case-summary::-webkit-details-marker { display: none; }
+
+/* ———— Starters ———— */
+.portfolio-page .pf-starters-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 56px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule-strong);
+}
+.portfolio-page .pf-starters-head h3 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+}
+.portfolio-page .pf-starters-head span {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.portfolio-page .pf-starter {
+    display: grid;
+    grid-template-columns: 56px 240px 1fr auto;
+    gap: 24px;
+    align-items: center;
+    padding-block: 18px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+}
+.portfolio-page .pf-starter .pf-idx {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-fade);
+}
+.portfolio-page .pf-starter .pf-nm { font-weight: 600; letter-spacing: -0.005em; color: var(--ink); }
+.portfolio-page .pf-starter .pf-st { font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); }
+.portfolio-page .pf-starter .pf-mt {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+}
+.portfolio-page .pf-starter .pf-mt b { color: var(--ink); font-weight: 500; }
+.portfolio-page .pf-starter .pf-mt a {
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+}
+.portfolio-page .pf-starter .pf-mt a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ———— Stack / skills ———— */
+.portfolio-page .pf-skills { padding-block: 24px 72px; scroll-margin-top: 64px; }
+.portfolio-page .pf-core {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 24px;
+    padding: 22px 24px 22px 28px;
+    background: var(--paper-2);
+    color: var(--ink);
+    align-items: baseline;
+    position: relative;
+    border: 1px solid var(--rule-strong);
+}
+.portfolio-page .pf-core::before {
+    content: "";
+    position: absolute;
+    left: -1px; top: -1px; bottom: -1px;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--accent), var(--signal));
+    box-shadow: 0 0 14px color-mix(in oklab, var(--accent) 60%, transparent);
+}
+.portfolio-page .pf-core .pf-k {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-core .pf-v {
+    display: flex; flex-wrap: wrap; gap: 12px 20px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+}
+.portfolio-page .pf-core .pf-v span { display: inline-flex; align-items: center; gap: 10px; }
+.portfolio-page .pf-core .pf-v span + span::before {
+    content: "·"; color: var(--ink-fade); margin-right: 20px;
+}
+.portfolio-page .pf-skill-grid {
+    margin-top: 44px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+}
+.portfolio-page .pf-skill-cell {
+    padding: 24px;
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+}
+.portfolio-page .pf-skill-cell:nth-child(4n+1) { padding-left: 0; }
+.portfolio-page .pf-skill-cell:nth-child(4n) { border-right: 0; padding-right: 0; }
+.portfolio-page .pf-skill-cell h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin: 0 0 14px;
+    font-weight: 500;
+}
+.portfolio-page .pf-skill-cell ul { list-style: none; padding: 0; margin: 0; }
+.portfolio-page .pf-skill-cell li {
+    padding: 4px 0;
+    font-size: 14px;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+}
+
+/* ———— Services ———— */
+.portfolio-page .pf-services {
+    padding-block: 24px 72px;
+    background: var(--paper-2);
+    border-block: 1px solid var(--rule);
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px));
+}
+.portfolio-page .pf-services-list { margin-top: 24px; }
+.portfolio-page .pf-svc {
+    display: grid;
+    grid-template-columns: 56px 1fr 1fr;
+    gap: 24px;
+    padding-block: 24px;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+}
+.portfolio-page .pf-svc .pf-n {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-fade);
+    letter-spacing: 0.08em;
+}
+.portfolio-page .pf-svc .pf-t {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    color: var(--ink);
+}
+.portfolio-page .pf-svc .pf-d {
+    color: var(--ink-mute);
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 52ch;
+}
+
+/* ———— Experience ———— */
+.portfolio-page .pf-exp { padding-block: 24px 72px; scroll-margin-top: 64px; }
+.portfolio-page .pf-exp-list { margin-top: 24px; }
+.portfolio-page .pf-exp-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 180px;
+    gap: 32px;
+    padding-block: 32px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+}
+.portfolio-page .pf-exp-row .pf-year {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    position: relative;
+}
+.portfolio-page .pf-exp-row .pf-year::after {
+    content: "";
+    position: absolute;
+    right: -17px; top: 6px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--accent);
+}
+.portfolio-page .pf-exp-row h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    margin: 0 0 10px;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    color: var(--ink);
+}
+.portfolio-page .pf-exp-row p {
+    color: var(--ink-mute);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 60ch;
+    margin: 0;
+}
+.portfolio-page .pf-exp-row .pf-tag {
+    justify-self: end;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-align: right;
+}
+
+/* ———— Deployment schematic ———— */
+.portfolio-page .pf-deploy {
+    background: #050507;
+    color: var(--ink);
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+    padding: 72px max(16px, env(safe-area-inset-left, 0px)) 84px;
+    border-top: 1px solid color-mix(in oklab, var(--accent) 55%, transparent);
+    border-bottom: 1px solid color-mix(in oklab, var(--signal) 55%, transparent);
+    box-shadow: 0 -1px 50px -12px color-mix(in oklab, var(--accent) 55%, transparent),
+                0 1px 50px -12px color-mix(in oklab, var(--signal) 55%, transparent);
+    position: relative;
+    scroll-margin-top: 64px;
+}
+.portfolio-page .pf-deploy .pf-section-head {
+    border-bottom-color: color-mix(in oklab, var(--ink) 15%, transparent);
+    padding-top: 0;
+}
+.portfolio-page .pf-deploy .pf-section-head .pf-num,
+.portfolio-page .pf-deploy .pf-section-head .pf-right {
+    color: color-mix(in oklab, var(--ink) 50%, transparent);
+}
+.portfolio-page .pf-deploy p.pf-sub {
+    max-width: 60ch;
+    color: color-mix(in oklab, var(--ink) 70%, transparent);
+    font-size: 16px;
+    line-height: 1.55;
+    margin: 24px 0 0;
+}
+.portfolio-page .pf-schematic {
+    margin-top: 48px;
+    border: 1px solid color-mix(in oklab, var(--signal) 25%, transparent);
+    background: color-mix(in oklab, var(--ink) 2%, transparent);
+    padding: 28px;
+    box-shadow: 0 0 40px -16px color-mix(in oklab, var(--signal) 35%, transparent),
+                inset 0 0 0 1px color-mix(in oklab, var(--accent) 10%, transparent);
+}
+.portfolio-page .pf-schematic-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px dashed color-mix(in oklab, var(--ink) 20%, transparent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--ink) 65%, transparent);
+}
+.portfolio-page .pf-flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    align-items: stretch;
+    position: relative;
+}
+.portfolio-page .pf-node {
+    border: 1px solid color-mix(in oklab, var(--ink) 15%, transparent);
+    background: color-mix(in oklab, var(--ink) 3%, transparent);
+    padding: 18px 18px 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    transition: background .2s, border-color .2s, box-shadow .2s;
+}
+.portfolio-page .pf-node:not(:last-child) { border-right: 0; }
+.portfolio-page .pf-node:hover {
+    background: color-mix(in oklab, var(--signal) 8%, transparent);
+    border-color: color-mix(in oklab, var(--signal) 55%, transparent);
+    box-shadow: 0 0 18px -4px color-mix(in oklab, var(--signal) 45%, transparent);
+}
+.portfolio-page .pf-node .pf-nk {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: color-mix(in oklab, var(--ink) 50%, transparent);
+    letter-spacing: 0.1em;
+}
+.portfolio-page .pf-node .pf-nv {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+    color: var(--ink);
+}
+.portfolio-page .pf-node .pf-ns {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--signal);
+    letter-spacing: 0.06em;
+    margin-top: auto;
+    display: flex; align-items: center; gap: 8px;
+    text-shadow: 0 0 8px color-mix(in oklab, var(--signal) 50%, transparent);
+}
+.portfolio-page .pf-node .pf-ns::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--signal);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--signal);
+}
+.portfolio-page .pf-arrow {
+    position: absolute;
+    right: -8px; top: 50%;
+    transform: translateY(-50%);
+    width: 16px; height: 16px;
+    display: grid; place-items: center;
+    background: #050507;
+    border: 1px solid color-mix(in oklab, var(--signal) 55%, transparent);
+    color: var(--signal);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    z-index: 1;
+}
+.portfolio-page .pf-deploy-stack {
+    margin-top: 28px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: color-mix(in oklab, var(--ink) 70%, transparent);
+}
+.portfolio-page .pf-deploy-stack span {
+    border: 1px solid color-mix(in oklab, var(--ink) 15%, transparent);
+    padding: 6px 12px;
+    letter-spacing: 0.04em;
+}
+
+/* ———— Contact ———— */
+.portfolio-page .pf-contact { padding-block: 24px 72px; scroll-margin-top: 64px; }
+.portfolio-page .pf-contact-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 56px;
+    align-items: start;
+    margin-top: 24px;
+}
+.portfolio-page .pf-contact h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    margin: 20px 0 24px;
+    text-wrap: balance;
+    color: var(--ink);
+}
+.portfolio-page .pf-contact p {
+    color: var(--ink-mute);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 50ch;
+    margin: 0 0 24px;
+}
+.portfolio-page .pf-avail {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal);
+}
+.portfolio-page .pf-avail::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--signal) 25%, transparent),
+                0 0 10px color-mix(in oklab, var(--signal) 60%, transparent);
+    animation: pf-pulse 2.2s ease-in-out infinite;
+}
+.portfolio-page .pf-contact-card {
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+}
+.portfolio-page .pf-contact-card .pf-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 20px;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+}
+.portfolio-page .pf-contact-card .pf-row:last-child { border-bottom: 0; }
+.portfolio-page .pf-contact-card .pf-row .pf-k {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+}
+.portfolio-page .pf-contact-card .pf-row .pf-v {
+    font-weight: 500;
+    min-width: 0;
+    word-break: break-word;
+    color: var(--ink);
+}
+.portfolio-page .pf-contact-card .pf-row .pf-v a {
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule-strong);
+    transition: border-color .15s, color .15s;
+}
+.portfolio-page .pf-contact-card .pf-row .pf-v a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.portfolio-page .pf-contact-card .pf-phone {
+    color: var(--signal);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 10px color-mix(in oklab, var(--signal) 40%, transparent);
+}
+.portfolio-page .pf-contact-card .pf-dl {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    margin-top: 4px;
+}
+.portfolio-page .pf-contact-card .pf-dl a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+}
+.portfolio-page .pf-contact-card .pf-dl a:hover {
+    background: var(--accent);
+    color: var(--accent-on);
+    border-color: var(--accent);
+}
+.portfolio-page .pf-contact-card .pf-links {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+.portfolio-page .pf-contact-card .pf-links a {
+    padding: 6px 12px;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink);
+}
+.portfolio-page .pf-contact-card .pf-links a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.portfolio-page .pf-contact-card .pf-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    margin-left: 10px;
+    border-bottom: 1px dotted var(--ink-mute);
+    cursor: pointer;
+}
+.portfolio-page .pf-email-status {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--signal);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ———— Colophon ———— */
+.portfolio-page .pf-colophon {
+    border-top: 1px solid var(--rule);
+    padding-block: 32px 48px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+}
+.portfolio-page .pf-colophon b { color: var(--ink); font-weight: 500; }
+.portfolio-page .pf-colophon .pf-colophon-right { text-align: right; }
+
+/* ———— Focus ———— */
+.portfolio-page :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* ———— Responsive ———— */
+@media (max-width: 960px) {
+    .portfolio-page .pf-hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    .portfolio-page .pf-about-grid { grid-template-columns: 1fr; gap: 32px; }
+    .portfolio-page .pf-portrait { max-width: 320px; }
+    .portfolio-page .pf-highlights { grid-template-columns: 1fr; }
+    .portfolio-page .pf-highlights div { border-right: 0 !important; padding-left: 0 !important; padding-right: 0; }
+    .portfolio-page .pf-skill-grid { grid-template-columns: 1fr 1fr; }
+    .portfolio-page .pf-skill-cell { padding: 24px; }
+    .portfolio-page .pf-skill-cell:nth-child(2n+1) { padding-left: 0; }
+    .portfolio-page .pf-skill-cell:nth-child(2n) { border-right: 0; padding-right: 0; }
+    .portfolio-page .pf-skill-cell:nth-child(4n+1) { padding-left: 0; }
+    .portfolio-page .pf-skill-cell:nth-child(4n) { border-right: 1px solid var(--rule); padding-right: 24px; }
+    .portfolio-page .pf-skill-cell:nth-child(2n) { border-right: 0; padding-right: 0; }
+    .portfolio-page .pf-entry { grid-template-columns: 36px 1fr; }
+    .portfolio-page .pf-entry .pf-meta,
+    .portfolio-page .pf-entry .pf-actions { grid-column: 2; }
+    .portfolio-page .pf-svc { grid-template-columns: 36px 1fr; }
+    .portfolio-page .pf-svc .pf-d { grid-column: 2; }
+    .portfolio-page .pf-exp-row { grid-template-columns: 1fr; gap: 12px; }
+    .portfolio-page .pf-exp-row .pf-year::after { display: none; }
+    .portfolio-page .pf-exp-row .pf-tag { justify-self: start; text-align: left; }
+    .portfolio-page .pf-flow { grid-template-columns: 1fr; }
+    .portfolio-page .pf-node:not(:last-child) { border-right: 1px solid color-mix(in oklab, var(--ink) 15%, transparent); border-bottom: 0; }
+    .portfolio-page .pf-arrow { right: 50%; top: auto; bottom: -8px; transform: translateX(50%); }
+    .portfolio-page .pf-contact-grid { grid-template-columns: 1fr; gap: 32px; }
+    .portfolio-page .pf-starter { grid-template-columns: 36px 1fr; gap: 12px; }
+    .portfolio-page .pf-starter .pf-st,
+    .portfolio-page .pf-starter .pf-mt { grid-column: 2; }
+    .portfolio-page .pf-colophon { grid-template-columns: 1fr; }
+    .portfolio-page .pf-colophon .pf-colophon-right { text-align: left; }
+    .portfolio-page .pf-facts-grid { grid-template-columns: 1fr; }
+    .portfolio-page .pf-facts-grid > div:nth-child(odd) { border-right: 0; }
+    .portfolio-page .pf-section-head { grid-template-columns: 48px 1fr; gap: 16px; }
+    .portfolio-page .pf-section-head .pf-right { grid-column: 1 / -1; }
+    .portfolio-page .pf-core { grid-template-columns: 1fr; gap: 12px; }
+    .portfolio-page .pf-status-row { gap: 10px 14px; font-size: 10.5px; }
+}
+
+@media (max-width: 560px) {
+    .portfolio-page .pf-nav-links { gap: 10px; }
+    .portfolio-page .pf-nav-links .pf-pill { display: none; }
+    .portfolio-page .pf-cta-row { gap: 10px; }
+    .portfolio-page .pf-cta { flex: 1 1 auto; justify-content: center; }
+    .portfolio-page .pf-entry .pf-actions { flex-direction: row; flex-wrap: wrap; gap: 6px 14px; }
+    .portfolio-page .pf-contact-card .pf-row { grid-template-columns: 1fr; gap: 6px; }
+    .portfolio-page .pf-contact-card .pf-row .pf-k { font-size: 10px; }
+}

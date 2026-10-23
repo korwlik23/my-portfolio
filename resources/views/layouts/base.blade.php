@@ -32,7 +32,7 @@
         }
     </script>
 </head>
-<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased min-h-screen">
+<body class="@yield('body_class', 'bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased min-h-screen')">
     @yield('site_nav')
     @yield('body')
     @include('components.page-loader')

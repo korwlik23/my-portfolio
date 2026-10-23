@@ -62,7 +62,7 @@
         return ! $isPlaceholderEmail(str_replace('mailto:', '', $link->url));
     })->map(fn ($link) => ['type' => $link->type, 'label' => $link->label ?: ucfirst($link->type), 'url' => $link->url]);
     $visibleLinks = $settingsLinks->merge($customLinks)->unique('type')->values();
-    $availability = $hero?->settings['availability'] ?? 'Available for selected work';
+    $availability = $hero?->settings['availability'] ?? __('messages.contact_availability');
     $heroStats = $hero?->settings['stats'] ?? [];
     $aboutHighlights = $about?->settings['highlights_' . $locale] ?? [];
     $deploymentSteps = $deployment?->settings['steps'] ?? ['Cloudflare DNS', 'Azure VM', 'Nginx', 'Laravel / Next.js', 'MySQL'];
@@ -98,41 +98,60 @@
             ['label' => __('messages.quick_fact_available'), 'value' => __('messages.quick_fact_available_value')],
         ]);
     $deploymentDiagram = ['Cloudflare DNS', 'Azure VM', 'Nginx Reverse Proxy', 'Laravel / Next.js Apps', 'MySQL / MariaDB Databases'];
-    $statusBadge = function (string|\UnitEnum $status, bool $isPublic = true): array {
+
+    $normalizeStatus = function ($status): string {
+        $value = $status instanceof \UnitEnum ? $status->value : (string) $status;
+        return str($value)->lower()->replace(['_', ' '], '-')->toString();
+    };
+    $statusDotClass = function ($status, bool $isPublic = true) use ($normalizeStatus): string {
         if (! $isPublic) {
-            return ['label' => __('messages.status_private'), 'class' => 'border-zinc-300 bg-zinc-100 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300'];
+            return '';
         }
-
-        $statusValue = $status instanceof \UnitEnum ? $status->value : $status;
-        $normalized = str($statusValue)->lower()->replace(['_', ' '], '-')->toString();
-
-        return match ($normalized) {
-            'live', 'available', 'published' => ['label' => __('messages.status_live'), 'class' => 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300'],
-            'main-starter' => ['label' => __('messages.status_main_starter'), 'class' => 'border-blue-300 bg-blue-100 text-blue-800 dark:border-blue-800 dark:bg-blue-950/80 dark:text-blue-200'],
-            'in-progress', 'progress', 'draft' => ['label' => __('messages.status_in_progress'), 'class' => 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-300'],
-            'architecture' => ['label' => __('messages.status_architecture'), 'class' => 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/60 dark:text-violet-300'],
-            'case-study' => ['label' => __('messages.case_study'), 'class' => 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/60 dark:text-violet-300'],
-            'dashboard' => ['label' => 'Dashboard', 'class' => 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-900 dark:bg-cyan-950/60 dark:text-cyan-300'],
-            'website' => ['label' => 'Website', 'class' => 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/60 dark:text-sky-300'],
-            'service' => ['label' => 'Service', 'class' => 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300'],
-            'tool' => ['label' => 'Tool', 'class' => 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-300'],
-            'saas' => ['label' => 'SaaS', 'class' => 'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-900 dark:bg-fuchsia-950/60 dark:text-fuchsia-300'],
-            default => ['label' => __('messages.status_demo'), 'class' => 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/60 dark:text-blue-300'],
+        return match ($normalizeStatus($status)) {
+            'live', 'available', 'published' => 'ok',
+            'in-progress', 'progress', 'draft' => 'wait',
+            default => '',
         };
     };
-    $projectBadges = fn ($project) => collect([
-        $statusBadge($project->status ?: 'demo', (bool) $project->is_public),
-        $project->type ? $statusBadge($project->type, (bool) $project->is_public) : null,
-        (bool) $project->is_public ? ['label' => __('messages.is_public'), 'class' => 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300'] : null,
-        (bool) $project->is_featured ? ['label' => __('messages.is_featured'), 'class' => 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/60 dark:text-violet-300'] : null,
-    ])->filter()->unique('label')->values();
-    $starterBadges = fn ($starter) => collect([
-        ((int) $starter->display_order === 1) ? $statusBadge('main-starter', (bool) $starter->is_public) : null,
-        $statusBadge($starter->status ?: 'demo', (bool) $starter->is_public),
-        str($starter->name.' '.implode(' ', $starter->stack ?? []))->lower()->contains(['cloud', 'deploy', 'azure', 'nginx'])
-            ? $statusBadge('architecture', (bool) $starter->is_public)
-            : null,
-    ])->filter()->unique('label')->values();
+    $statusLabelFor = function ($status, bool $isPublic = true) use ($normalizeStatus): string {
+        if (! $isPublic) {
+            return __('messages.status_private');
+        }
+        return match ($normalizeStatus($status)) {
+            'live', 'available', 'published' => __('messages.status_live'),
+            'in-progress', 'progress', 'draft' => __('messages.status_in_progress'),
+            'main-starter' => __('messages.status_main_starter'),
+            default => __('messages.status_demo'),
+        };
+    };
+    $typeLabelFor = function ($type): ?string {
+        if (! $type) return null;
+        $value = $type instanceof \UnitEnum ? $type->value : (string) $type;
+        return ucfirst(strtolower((string) $value));
+    };
+
+    $heroTitleRaw = $hero?->localized('title', $locale) ?? '';
+    $titleMarker = $locale === 'th' ? 'จริง' : 'practical';
+    $heroTitleEscaped = e($heroTitleRaw);
+    if ($titleMarker !== '' && stripos($heroTitleRaw, $titleMarker) !== false) {
+        $heroTitleHtml = preg_replace(
+            '/(' . preg_quote($titleMarker, '/') . ')/iu',
+            '<em>$1</em>',
+            $heroTitleEscaped,
+            1
+        );
+    } else {
+        $heroTitleHtml = $heroTitleEscaped;
+    }
+
+    $tickerItems = $coreStackSkills;
+    if (count($tickerItems) < 10) {
+        $tickerItems = array_values(array_unique(array_merge(
+            $tickerItems,
+            $allSkills->pluck('name')->take(14)->all()
+        )));
+    }
+
     $personSchema = [
         '@context' => 'https://schema.org',
         '@type' => 'Person',
@@ -158,6 +177,12 @@
     @section('og_image', $ogImage)
 @endif
 
+@section('body_class', 'portfolio-page antialiased min-h-screen')
+
+@push('head')
+<link href="https://fonts.bunny.net/css?family=ibm-plex-mono:400,500,600|ibm-plex-sans:400,500,600,700|ibm-plex-sans-condensed:600,700|ibm-plex-sans-thai:400,500,600,700&display=swap" rel="stylesheet" />
+@endpush
+
 @push('scripts')
 <script type="application/ld+json">
 {!! json_encode($personSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
@@ -165,80 +190,133 @@
 @endpush
 
 @section('site_nav')
-    <header id="site-navbar" data-portfolio-navbar class="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
-        <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white">{{ __('messages.skip_to_content') }}</a>
-        <nav class="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-            <a href="{{ url('/') }}" class="flex min-w-0 items-center gap-3">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-950 text-sm font-bold text-white shadow-sm dark:bg-white dark:text-zinc-950">{{ $brandInitials }}</span>
-                <span class="truncate font-semibold tracking-tight">{{ $publicBrand }}</span>
+    <a href="#main-content" class="pf-skip">{{ __('messages.skip_to_content') }}</a>
+    <header class="pf-nav">
+        <div class="pf-wrap pf-nav-inner">
+            <a href="{{ url('/') }}" class="pf-brand">
+                <b>{{ $publicBrand }}</b>
+                <span>/ fullstack dev · bkk</span>
             </a>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('lang.switch', 'en') }}" aria-label="{{ __('messages.switch_to_english') }}" class="rounded-lg px-3 py-2 text-xs font-bold {{ $locale === 'en' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900' }}">EN</a>
-                <a href="{{ route('lang.switch', 'th') }}" aria-label="{{ __('messages.switch_to_thai') }}" class="rounded-lg px-3 py-2 text-xs font-bold {{ $locale === 'th' ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900' }}">TH</a>
-                <button type="button" onclick="toggleDarkMode()" class="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950 dark:hover:bg-zinc-900 dark:hover:text-white" aria-label="{{ __('messages.toggle_mode') }}">
-                    <x-icon name="sun" class="h-5 w-5" />
-                </button>
+            <nav class="pf-nav-links" aria-label="Primary">
+                <a href="#about">{{ __('messages.portfolio_about') }}</a>
+                <a href="#work">{{ __('messages.portfolio_projects') }}</a>
+                <a href="#stack">{{ __('messages.skills') }}</a>
+                <a href="#deploy">{{ __('messages.deployment_case_study') }}</a>
+                <a href="#contact">{{ __('messages.contact') }}</a>
+                <span class="pf-pill" aria-label="{{ $availability }}"><span class="pf-dot ok"></span>OPEN</span>
+                <a href="{{ route('lang.switch', 'en') }}" aria-label="{{ __('messages.switch_to_english') }}" style="{{ $locale === 'en' ? 'color: var(--ink);' : '' }}">EN</a>
+                <span class="pf-sep">/</span>
+                <a href="{{ route('lang.switch', 'th') }}" aria-label="{{ __('messages.switch_to_thai') }}" style="{{ $locale === 'th' ? 'color: var(--ink);' : '' }}">TH</a>
                 @auth
-                    <a href="{{ route('admin.dashboard') }}" class="hidden rounded-lg border border-zinc-200 px-3 py-2 text-xs font-bold hover:bg-zinc-100 dark:border-zinc-800 dark:hover:bg-zinc-900 sm:inline-flex">{{ __('messages.dashboard') }}</a>
+                    <a href="{{ route('admin.dashboard') }}" class="pf-admin">{{ __('messages.dashboard') }}</a>
                 @else
-                    <a href="{{ route('login') }}" class="hidden rounded-lg border border-zinc-200 px-3 py-2 text-xs font-bold hover:bg-zinc-100 dark:border-zinc-800 dark:hover:bg-zinc-900 sm:inline-flex">{{ __('messages.login') }}</a>
+                    <a href="{{ route('login') }}" class="pf-admin">{{ __('messages.login') }}</a>
                 @endauth
-            </div>
-        </nav>
+            </nav>
+        </div>
     </header>
 @endsection
 
 @section('body')
-<main id="main-content" class="min-h-screen overflow-x-hidden bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50">
-    <section class="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 sm:py-14 lg:min-h-[calc(82svh-4rem)] lg:grid-cols-[1.1fr_.9fr] lg:gap-12 lg:py-16">
-        <div class="min-w-0">
-            <p class="mb-5 inline-block max-w-full whitespace-normal break-words rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold leading-5 text-blue-700 shadow-sm dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300">{{ $availability }}</p>
-            <h1 class="max-w-full break-words text-4xl font-bold leading-tight tracking-tight sm:max-w-4xl sm:text-6xl">{{ $hero?->localized('title', $locale) }}</h1>
-            <p class="mt-6 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">{{ $hero?->localized('subtitle', $locale) }}</p>
-            <div class="mt-8 flex min-w-0 flex-wrap gap-3">
-                @if($hero?->primary_cta_url)
-                    <a href="{{ $hero->primary_cta_url }}" class="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-950 sm:w-auto">{{ $hero->localized('primary_cta_text', $locale) ?: __('messages.view_live_projects') }}</a>
-                @endif
-                @if($hero?->secondary_cta_url)
-                    <a href="{{ $hero->secondary_cta_url }}" class="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-zinc-300 bg-white px-5 py-3 text-sm font-bold transition hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:border-zinc-500 dark:hover:bg-zinc-900 sm:w-auto">{{ $hero->localized('secondary_cta_text', $locale) }}</a>
-                @endif
-            </div>
+<main id="main-content">
+    <section class="pf-wrap pf-hero">
+        <div class="pf-status-row" role="status">
+            <span><b>STATUS</b> <span class="pf-dot ok"></span> ONLINE <span class="pf-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
+            <span><b>{{ date('Y') }}-Q{{ ceil(date('n') / 3) }}</b> {{ strtoupper($availability) }}</span>
+            <span><b>BKK</b> UTC+07</span>
+            <span>v{{ date('y.n') }}</span>
         </div>
-        <div class="grid min-w-0 gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            @foreach($heroStats as $stat)
-                <article class="rounded-lg border border-zinc-200 bg-zinc-50 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-900 dark:hover:bg-zinc-900/80">
-                    <p class="text-xs font-bold uppercase text-blue-600 dark:text-blue-300">{{ $stat['label_' . $locale] ?? $stat['label_en'] ?? '' }}</p>
-                    <p class="mt-2 text-2xl font-bold">{{ $stat['value'] ?? '' }}</p>
-                </article>
-            @endforeach
+
+        <div class="pf-hero-grid">
+            <div>
+                <h1>{!! $heroTitleHtml !!}</h1>
+                <p class="pf-lede">
+                    {{ $hero?->localized('subtitle', $locale) }}
+                </p>
+                <div class="pf-cta-row">
+                    @if($hero?->primary_cta_url)
+                        <a href="{{ $hero->primary_cta_url }}" class="pf-cta primary">{{ $hero->localized('primary_cta_text', $locale) ?: __('messages.view_live_projects') }} <span aria-hidden="true">→</span></a>
+                    @endif
+                    @if($hero?->secondary_cta_url)
+                        <a href="{{ $hero->secondary_cta_url }}" class="pf-cta ghost">{{ $hero->localized('secondary_cta_text', $locale) }} <span aria-hidden="true">↗</span></a>
+                    @endif
+                </div>
+            </div>
+
+            <aside class="pf-spec" aria-label="{{ __('messages.core_stack_highlight') }}">
+                <div class="pf-spec-head">
+                    <span>// current.stack</span>
+                    <span><span class="pf-dot ok"></span>RUNNING</span>
+                </div>
+                @foreach($heroStats as $stat)
+                    <div class="pf-spec-row">
+                        <span class="pf-k">{{ strtolower($stat['label_' . $locale] ?? $stat['label_en'] ?? '') }}</span>
+                        <span class="pf-v">{{ $stat['value'] ?? '' }}</span>
+                    </div>
+                @endforeach
+                <div class="pf-spec-row">
+                    <span class="pf-k">availability</span>
+                    <span class="pf-v pf-avail-value">{{ $availability }}</span>
+                </div>
+            </aside>
         </div>
     </section>
 
-    <section id="about" class="scroll-mt-24 border-y border-zinc-200 bg-zinc-50 py-14 dark:border-zinc-800 dark:bg-zinc-900/50 sm:py-16">
-        <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[.8fr_1.2fr]">
-            <div>
-                <p class="text-sm font-bold uppercase text-blue-600">{{ __('messages.portfolio_about') }}</p>
-                <h2 class="mt-3 text-3xl font-bold">{{ $about?->localized('title', $locale) }}</h2>
+    <div class="pf-ticker" aria-hidden="true">
+        <div class="pf-ticker-track">
+            @foreach($tickerItems as $item)
+                <span>{{ $item }}</span>
+            @endforeach
+            @foreach($tickerItems as $item)
+                <span>{{ $item }}</span>
+            @endforeach
+        </div>
+    </div>
+
+    <section id="about" class="pf-wrap pf-about">
+        <div class="pf-section-head">
+            <span class="pf-num">§ 01</span>
+            <h2>{{ __('messages.portfolio_about') }}</h2>
+            <span class="pf-right">file: about.md</span>
+        </div>
+
+        <div class="pf-about-grid">
+            <figure class="pf-portrait" aria-label="{{ __('messages.profile_image_alt', ['name' => $publicBrand]) }}">
                 @if($about?->image_path)
-                    <div class="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-                        <img src="{{ route('portfolio.media', ['path' => $about->image_path]) }}" alt="{{ __('messages.profile_image_alt', ['name' => $publicBrand]) }}" loading="lazy" class="aspect-[4/5] w-full object-cover">
+                    <img src="{{ route('portfolio.media', ['path' => $about->image_path]) }}" alt="{{ __('messages.profile_image_alt', ['name' => $publicBrand]) }}" loading="lazy">
+                @else
+                    <svg viewBox="0 0 160 200" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" style="width:68%;height:auto;opacity:.45;">
+                        <circle cx="80" cy="70" r="34"/>
+                        <path d="M24 196c0-32 25-58 56-58s56 26 56 58"/>
+                    </svg>
+                @endif
+                <figcaption class="pf-portrait-caption">
+                    <span>fig. {{ $brandInitials }} / Bangkok</span>
+                    <span>{{ date('Y') }}</span>
+                </figcaption>
+            </figure>
+
+            <div class="pf-about-body">
+                <p>{{ $about?->localized('body', $locale) }}</p>
+
+                @if(count($aboutHighlights))
+                    <div class="pf-highlights">
+                        @foreach($aboutHighlights as $highlight)
+                            <div>{{ $highlight }}</div>
+                        @endforeach
                     </div>
                 @endif
-            </div>
-            <div>
-                <p class="text-lg leading-8 text-zinc-700 dark:text-zinc-300">{{ $about?->localized('body', $locale) }}</p>
-                <div class="mt-6 grid gap-3 sm:grid-cols-3">
-                    @foreach($aboutHighlights as $highlight)
-                        <div class="rounded-lg border border-zinc-200 bg-white p-4 text-sm font-medium leading-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">{{ $highlight }}</div>
-                    @endforeach
-                </div>
-                <div class="mt-8 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-                    <h3 class="text-sm font-bold uppercase text-zinc-500 dark:text-zinc-400">{{ __('messages.quick_facts') }}</h3>
-                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+
+                <div class="pf-facts">
+                    <div class="pf-facts-head">
+                        <span>// quick.facts</span>
+                        <span>{{ $quickFacts->count() }} {{ $locale === 'th' ? 'รายการ' : 'entries' }}</span>
+                    </div>
+                    <div class="pf-facts-grid">
                         @foreach($quickFacts as $fact)
-                            <div class="rounded-lg border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
-                                <p class="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">{{ $fact['label'] }}</p>
-                                <p class="mt-1 text-sm font-semibold leading-6">{{ $fact['value'] }}</p>
+                            <div>
+                                <span class="pf-k">{{ $fact['label'] }}</span>
+                                <span class="pf-v">{{ $fact['value'] }}</span>
                             </div>
                         @endforeach
                     </div>
@@ -247,215 +325,276 @@
         </div>
     </section>
 
-    <section id="projects" class="mx-auto max-w-7xl scroll-mt-24 px-4 py-14 sm:px-6 sm:py-16">
-        <div class="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <p class="text-sm font-bold uppercase text-blue-600">{{ __('messages.portfolio_projects') }}</p>
-                <h2 class="mt-2 text-3xl font-bold">{{ __('messages.featured_projects') }}</h2>
-            </div>
+    <section id="work" class="pf-wrap pf-work">
+        <div class="pf-section-head">
+            <span class="pf-num">§ 02</span>
+            <h2>{{ __('messages.featured_projects') }}</h2>
+            <span class="pf-right">{{ $projects->count() }} {{ $locale === 'th' ? 'โปรเจกต์' : 'entries' }}</span>
         </div>
-        <div class="grid gap-5 lg:grid-cols-3">
+
+        <div>
             @foreach($projects as $project)
-                @php($badges = $projectBadges($project))
-                <article class="group flex min-h-full flex-col rounded-lg border border-zinc-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-900 dark:hover:shadow-blue-950/10">
-                    <div class="mb-4 flex flex-wrap items-center gap-2">
-                        @foreach($badges as $badge)
-                            <span class="rounded-full border px-2.5 py-1 text-xs font-bold {{ $badge['class'] }}">{{ $badge['label'] }}</span>
-                        @endforeach
-                    </div>
-                    @if($project->image_path)
-                        <div class="mb-5 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950">
-                            <img src="{{ route('portfolio.media', ['path' => $project->image_path]) }}" alt="{{ __('messages.project_image_alt', ['name' => $project->name]) }}" loading="lazy" class="aspect-video w-full object-cover">
+                @php
+                    $dotClass = $statusDotClass($project->status ?: 'demo', (bool) $project->is_public);
+                    $statusText = $statusLabelFor($project->status ?: 'demo', (bool) $project->is_public);
+                    $typeText = $typeLabelFor($project->type);
+                @endphp
+                <article class="pf-entry">
+                    <span class="pf-idx">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                    <div>
+                        <div class="pf-lead-row">
+                            @if($dotClass)<span class="pf-dot {{ $dotClass }}"></span>@endif
+                            <b>{{ $statusText }}</b>
+                            @if($typeText)<span>· {{ $typeText }}</span>@endif
+                            @if($project->is_featured)<span>· {{ __('messages.is_featured') }}</span>@endif
                         </div>
-                    @endif
-                    <h3 class="text-xl font-bold tracking-tight">{{ $project->name }}</h3>
-                    <p class="mt-3 flex-1 text-sm leading-7 text-zinc-600 dark:text-zinc-400">{{ $project->localized('description', $locale) }}</p>
-                    <div class="mt-5 flex flex-wrap gap-2">
-                        @foreach($project->techStacks as $tech)
-                            <span class="rounded-full border border-zinc-200 px-2.5 py-1 text-xs dark:border-zinc-700">{{ $tech->name }}</span>
-                        @endforeach
+                        <h3>{{ $project->name }}</h3>
+                        <p class="pf-desc">{{ $project->localized('description', $locale) }}</p>
+                        @if($project->techStacks->isNotEmpty())
+                            <div class="pf-stack">
+                                @foreach($project->techStacks as $tech)
+                                    <span>{{ $tech->name }}</span>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
-                    <div class="mt-6 flex flex-wrap gap-2 text-sm font-bold">
-                        @if($project->live_demo_url)<a class="inline-flex min-h-10 items-center rounded-lg bg-blue-600 px-3.5 py-2 text-white transition hover:bg-blue-500" href="{{ $project->live_demo_url }}" target="_blank" rel="noopener" aria-label="{{ __('messages.live_demo_for', ['name' => $project->name]) }}">{{ __('messages.live_demo') }}</a>@endif
+                    <div class="pf-meta">
+                        @if($project->created_at)
+                            <div><b>{{ $project->created_at->year }}</b></div>
+                        @endif
+                        <div>{{ (bool) $project->is_public ? __('messages.is_public') : __('messages.status_private') }}</div>
+                    </div>
+                    <div class="pf-actions">
+                        @if($project->live_demo_url)
+                            <a href="{{ $project->live_demo_url }}" target="_blank" rel="noopener" aria-label="{{ __('messages.live_demo_for', ['name' => $project->name]) }}">{{ __('messages.live_demo') }} →</a>
+                        @endif
                         @if($project->localized('case_study', $locale))
-                            <details class="w-full min-w-0 max-w-full sm:w-auto">
-                                <summary class="inline-flex min-h-10 cursor-pointer list-none items-center rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-zinc-800 transition hover:border-blue-300 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:border-blue-800 dark:hover:text-blue-300">{{ __('messages.case_study') }}</summary>
-                                <p class="mt-3 break-words rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm font-medium leading-7 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">{{ $project->localized('case_study', $locale) }}</p>
+                            <details>
+                                <summary class="pf-case-summary">{{ __('messages.case_study') }} ↓</summary>
+                                <p class="pf-case">{{ $project->localized('case_study', $locale) }}</p>
                             </details>
                         @endif
                         @if($project->github_url)
-                            <a class="inline-flex min-h-10 items-center rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-zinc-800 transition hover:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:border-zinc-500" href="{{ $project->github_url }}" target="_blank" rel="noopener" aria-label="{{ __('messages.github_for', ['name' => $project->name]) }}">GitHub</a>
+                            <a href="{{ $project->github_url }}" target="_blank" rel="noopener" aria-label="{{ __('messages.github_for', ['name' => $project->name]) }}">GitHub ↗</a>
                         @else
-                            <span class="inline-flex min-h-10 items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3.5 py-2 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400" aria-label="{{ __('messages.private_repo_for', ['name' => $project->name]) }}">{{ __('messages.private_repo') }}</span>
+                            <span>{{ __('messages.private_repo') }}</span>
                         @endif
                     </div>
                 </article>
             @endforeach
         </div>
-    </section>
 
-    <section class="bg-zinc-50 py-14 dark:bg-zinc-900/50 sm:py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6">
-            <p class="text-sm font-bold uppercase text-blue-600">{{ __('messages.portfolio_starters') }}</p>
-            <h2 class="mt-2 text-3xl font-bold">{{ __('messages.project_starters') }}</h2>
-            <div class="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                @foreach($starters as $starter)
-                    @php($badges = $starterBadges($starter))
-                    @php($isMainStarter = (int) $starter->display_order === 1)
-                    <article class="rounded-lg border p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-zinc-950/5 dark:hover:border-blue-900 {{ $isMainStarter ? 'border-blue-300 bg-blue-50/80 ring-1 ring-blue-100 dark:border-blue-800 dark:bg-blue-950/20 dark:ring-blue-950' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950' }}">
-                        <div class="mb-4 flex flex-wrap items-center gap-2">
-                            @foreach($badges as $badge)
-                                <span class="rounded-full border px-2.5 py-1 text-xs font-bold {{ $badge['class'] }}">{{ $badge['label'] }}</span>
-                            @endforeach
-                        </div>
-                        <h3 class="font-bold">{{ $starter->name }}</h3>
-                        <p class="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-400">{{ $starter->localized('description', $locale) }}</p>
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            @foreach(($starter->stack ?? []) as $item)
-                                <span class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs dark:bg-zinc-800">{{ $item }}</span>
-                            @endforeach
-                        </div>
-                        <div class="mt-5 flex flex-wrap gap-2 text-sm font-bold">
-                            @if($starter->demo_url)<a class="inline-flex min-h-10 items-center rounded-lg bg-blue-600 px-3.5 py-2 text-white transition hover:bg-blue-500" href="{{ $starter->demo_url }}" target="_blank" rel="noopener">{{ __('messages.live_demo') }}</a>@endif
-                            @if($starter->github_url)<a class="inline-flex min-h-10 items-center rounded-lg border border-zinc-300 bg-white px-3.5 py-2 transition hover:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950" href="{{ $starter->github_url }}" target="_blank" rel="noopener">GitHub</a>@endif
-                        </div>
-                    </article>
-                @endforeach
+        @if($starters->isNotEmpty())
+            <div class="pf-starters-head">
+                <h3>{{ __('messages.project_starters') }}</h3>
+                <span>{{ $starters->count() }} {{ $locale === 'th' ? 'เท็มเพลต' : 'published' }}</span>
             </div>
-        </div>
-    </section>
-
-    <section class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[.8fr_1.2fr] lg:gap-12">
-        <div>
-            <p class="text-sm font-bold uppercase text-blue-600">{{ __('messages.skills') }}</p>
-            <h2 class="mt-2 text-3xl font-bold">{{ __('messages.portfolio_skills_heading') }}</h2>
-        </div>
-        <div>
-            <article class="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-5 shadow-sm dark:border-blue-900 dark:bg-blue-950/30">
-                <h3 class="text-sm font-bold uppercase text-blue-700 dark:text-blue-300">{{ __('messages.core_stack_highlight') }}</h3>
-                <div class="mt-4 flex flex-wrap gap-2">
-                    @foreach($coreStackSkills as $skillName)
-                        <span class="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-zinc-800 shadow-sm dark:bg-zinc-950 dark:text-zinc-100">{{ $skillName }}</span>
-                    @endforeach
-                </div>
-            </article>
-            <div class="grid gap-5 md:grid-cols-2">
-                @foreach($skillsByCategory as $category => $skills)
-                    <article class="rounded-lg border border-zinc-200 p-5 shadow-sm transition hover:border-blue-200 dark:border-zinc-800 dark:hover:border-blue-900">
-                        <h3 class="font-bold">{{ $category }}</h3>
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            @foreach($skills as $skill)
-                                <span class="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold dark:bg-zinc-900">{{ $skill->name }}</span>
-                            @endforeach
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section class="border-y border-zinc-200 bg-zinc-50 py-14 dark:border-zinc-800 dark:bg-zinc-900/50 sm:py-16">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6">
-            <p class="text-sm font-bold uppercase text-blue-600">{{ __('messages.services') }}</p>
-            <h2 class="mt-2 text-3xl font-bold">{{ __('messages.portfolio_services_heading') }}</h2>
-            <div class="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                @foreach($services as $service)
-                    <article class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-900">
-                        <h3 class="font-bold">{{ $service->localized('title', $locale) }}</h3>
-                        <p class="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-400">{{ $service->localized('description', $locale) }}</p>
-                    </article>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section id="experience" class="mx-auto max-w-7xl scroll-mt-24 px-4 py-14 sm:px-6 sm:py-16">
-        <p class="text-sm font-bold uppercase text-blue-600">{{ __('messages.experience') }}</p>
-        <h2 class="mt-2 text-3xl font-bold">{{ __('messages.experience_highlights') }}</h2>
-        <div class="mt-8 grid gap-5 lg:grid-cols-3">
-            @foreach($experiences as $experience)
-                <article class="rounded-lg border border-zinc-200 p-5 shadow-sm transition hover:border-blue-200 dark:border-zinc-800 dark:hover:border-blue-900">
-                    <p class="text-xs font-bold uppercase text-zinc-500">{{ $experience->period }}</p>
-                    <h3 class="mt-2 text-lg font-bold leading-7">{{ $experience->localized('title', $locale) }}</h3>
-                    <p class="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-400">{{ $experience->localized('description', $locale) }}</p>
+            @foreach($starters as $starter)
+                @php
+                    $isMainStarter = (int) $starter->display_order === 1;
+                    $dotClass = $statusDotClass($starter->status ?: 'demo', (bool) $starter->is_public);
+                    $statusText = $statusLabelFor($starter->status ?: 'demo', (bool) $starter->is_public);
+                @endphp
+                <article class="pf-starter">
+                    <span class="pf-idx">S.{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                    <div class="pf-nm">{{ $starter->name }}</div>
+                    <div class="pf-st">{{ implode(' · ', $starter->stack ?? []) }}</div>
+                    <div class="pf-mt">
+                        @if($dotClass)<span class="pf-dot {{ $dotClass }}"></span>@endif
+                        <b>{{ $statusText }}</b>
+                        @if($isMainStarter)<span>· {{ __('messages.status_main_starter') }}</span>@endif
+                        @if($starter->demo_url)<a href="{{ $starter->demo_url }}" target="_blank" rel="noopener">{{ __('messages.live_demo') }} →</a>@endif
+                        @if($starter->github_url)<a href="{{ $starter->github_url }}" target="_blank" rel="noopener">GitHub ↗</a>@endif
+                    </div>
                 </article>
+            @endforeach
+        @endif
+    </section>
+
+    <section id="stack" class="pf-wrap pf-skills">
+        <div class="pf-section-head">
+            <span class="pf-num">§ 03</span>
+            <h2>{{ __('messages.portfolio_skills_heading') }}</h2>
+            <span class="pf-right">{{ $locale === 'th' ? 'จัดกลุ่มตามการใช้งานจริง' : 'grouped by practical use' }}</span>
+        </div>
+
+        <div class="pf-core">
+            <span class="pf-k">{{ __('messages.core_stack_highlight') }}</span>
+            <div class="pf-v">
+                @foreach($coreStackSkills as $skillName)
+                    <span>{{ $skillName }}</span>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="pf-skill-grid">
+            @foreach($skillsByCategory as $category => $skills)
+                <div class="pf-skill-cell">
+                    <h4>{{ $category }}</h4>
+                    <ul>
+                        @foreach($skills as $skill)
+                            <li>{{ $skill->name }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             @endforeach
         </div>
     </section>
 
-    <section id="deployment" class="scroll-mt-28 bg-zinc-950 pb-14 pt-20 text-white sm:pb-16 sm:pt-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6">
-            <p class="text-sm font-bold uppercase text-blue-300">{{ __('messages.deployment_case_study') }}</p>
-            <h2 class="mt-2 text-3xl font-bold">{{ $deployment?->localized('title', $locale) }}</h2>
-            <p class="mt-4 max-w-3xl leading-7 text-zinc-300">{{ $deployment?->localized('subtitle', $locale) }}</p>
-            <div class="mt-10 rounded-lg border border-white/10 bg-white/[.03] p-5">
-                <h3 class="text-sm font-bold uppercase text-blue-200">{{ __('messages.deployment_architecture') }}</h3>
-                <div class="mt-5 flex flex-col gap-3 lg:flex-row lg:items-stretch">
-                    @foreach($deploymentDiagram as $step)
-                        <div class="rounded-lg border border-white/10 bg-zinc-900 p-4 text-sm font-bold text-white shadow-lg shadow-black/10 lg:flex-1">
-                            <span class="block text-blue-200">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                            <span class="mt-2 block leading-6">{{ $step }}</span>
-                        </div>
-                        @unless($loop->last)
-                            <div class="flex items-center justify-center text-blue-200" aria-hidden="true">
-                                <span class="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-zinc-950 text-sm lg:hidden">&darr;</span>
-                                <span class="hidden h-10 w-10 place-items-center rounded-full border border-white/10 bg-zinc-950 text-sm lg:grid">&rarr;</span>
-                            </div>
-                        @endunless
-                    @endforeach
-                </div>
+    <section class="pf-services">
+        <div class="pf-wrap">
+            <div class="pf-section-head" style="padding-top: 0;">
+                <span class="pf-num">§ 04</span>
+                <h2>{{ __('messages.portfolio_services_heading') }}</h2>
+                <span class="pf-right">{{ $locale === 'th' ? 'สำหรับทีม ผู้ก่อตั้ง และลูกค้า' : 'for teams, founders, clients' }}</span>
             </div>
-            <div class="mt-8 grid gap-3 md:grid-cols-4 lg:grid-cols-7">
-                @foreach($deploymentSteps as $step)
-                    <div class="rounded-lg border border-white/10 bg-white/5 p-4 text-sm font-bold text-zinc-100">{{ $step }}</div>
+            <div class="pf-services-list">
+                @foreach($services as $service)
+                    <div class="pf-svc">
+                        <span class="pf-n">S / {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                        <span class="pf-t">{{ $service->localized('title', $locale) }}</span>
+                        <span class="pf-d">{{ $service->localized('description', $locale) }}</span>
+                    </div>
                 @endforeach
             </div>
         </div>
     </section>
 
-    <section id="contact" class="mx-auto max-w-7xl scroll-mt-24 px-4 py-14 sm:px-6 sm:py-16">
-        <div class="grid gap-6 rounded-lg border border-zinc-200 bg-zinc-50 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
-            <div>
-                <p class="text-sm font-bold uppercase text-blue-600">{{ __('messages.contact') }}</p>
-                <h2 class="mt-2 text-3xl font-bold">{{ __('messages.portfolio_contact_heading') }}</h2>
-                <p class="mt-4 max-w-2xl leading-7 text-zinc-600 dark:text-zinc-400">{{ __('messages.portfolio_contact_body') }}</p>
-                <p class="mt-4 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300">{{ __('messages.contact_availability') }}</p>
-            </div>
-            <div class="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-                @if($contactEmail)
-                    <p class="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">{{ __('messages.email') }}</p>
-                    <a href="mailto:{{ $contactEmail }}" data-no-loader data-email-link data-email="{{ $contactEmail }}" class="mt-2 block break-all text-lg font-bold text-blue-600 hover:underline dark:text-blue-300">{{ $contactEmail }}</a>
-                @else
-                    <p class="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">{{ __('messages.contact_links') }}</p>
-                    <p class="mt-2 text-sm font-semibold leading-6 text-zinc-700 dark:text-zinc-300">{{ __('messages.contact_email_not_configured') }}</p>
-                @endif
-                @if($contactPhone)
-                    <div class="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
-                        <p class="text-xs font-bold uppercase text-blue-700 dark:text-blue-300">{{ __('messages.urgent_contact') }}</p>
-                        <a href="{{ $contactPhoneHref }}" data-no-loader class="mt-2 block break-all text-lg font-bold text-zinc-950 hover:text-blue-700 hover:underline dark:text-white dark:hover:text-blue-300" aria-label="{{ __('messages.urgent_contact') }} {{ $contactPhone }}">
-                            {{ $contactPhone }}
-                        </a>
+    <section id="experience" class="pf-wrap pf-exp">
+        <div class="pf-section-head">
+            <span class="pf-num">§ 05</span>
+            <h2>{{ __('messages.experience_highlights') }}</h2>
+            <span class="pf-right">{{ __('messages.experience') }}</span>
+        </div>
+
+        <div class="pf-exp-list">
+            @foreach($experiences as $experience)
+                <div class="pf-exp-row">
+                    <span class="pf-year">{{ $experience->period }}</span>
+                    <div>
+                        <h3>{{ $experience->localized('title', $locale) }}</h3>
+                        <p>{{ $experience->localized('description', $locale) }}</p>
                     </div>
-                @endif
-                <div class="mt-5 flex flex-wrap gap-3">
-                    @if($resumeThUrl)
-                        <a href="{{ $resumeThUrl }}" download class="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-bold transition hover:border-blue-300 hover:text-blue-600 dark:border-zinc-700 dark:hover:border-blue-800 dark:hover:text-blue-300 sm:w-auto">{{ __('messages.download_resume_th') }}</a>
-                    @endif
-                    @if($resumeEnUrl)
-                        <a href="{{ $resumeEnUrl }}" download class="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-zinc-300 px-4 py-2 text-sm font-bold transition hover:border-blue-300 hover:text-blue-600 dark:border-zinc-700 dark:hover:border-blue-800 dark:hover:text-blue-300 sm:w-auto">{{ __('messages.download_resume_en') }}</a>
-                    @endif
+                    <span class="pf-tag">Portfolio<br>highlight</span>
                 </div>
-                <div class="mt-5 flex flex-wrap gap-2">
-                    @foreach($visibleLinks as $link)
-                        <a href="{{ $link['url'] }}" target="{{ str_starts_with($link['url'], 'mailto:') ? '_self' : '_blank' }}" rel="noopener" class="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-bold hover:border-blue-300 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-950" aria-label="{{ $link['label'] }}">{{ $link['label'] }}</a>
+            @endforeach
+        </div>
+    </section>
+
+    <section id="deploy" class="pf-deploy">
+        <div class="pf-wrap">
+            <div class="pf-section-head">
+                <span class="pf-num">§ 06</span>
+                <h2>{{ $deployment?->localized('title', $locale) ?: __('messages.deployment_case_study') }}</h2>
+                <span class="pf-right">case study / live</span>
+            </div>
+            @if($deployment?->localized('subtitle', $locale))
+                <p class="pf-sub">{{ $deployment->localized('subtitle', $locale) }}</p>
+            @endif
+
+            <div class="pf-schematic" aria-label="{{ __('messages.deployment_architecture') }}">
+                <div class="pf-schematic-head">
+                    <span>deploy.diagram — one VM, N apps</span>
+                    <span>{{ $locale === 'th' ? 'ตรวจล่าสุด' : 'last verified' }} {{ date('Y-m') }}</span>
+                </div>
+                <div class="pf-flow">
+                    @php($flowLabels = ['edge', 'host', 'proxy', 'apps', 'data'])
+                    @php($flowStatus = ['cached · proxied', 'ubuntu · running', 'reverse · ssl', 'php-fpm · pm2', 'persistent'])
+                    @foreach($deploymentDiagram as $index => $step)
+                        <div class="pf-node">
+                            <span class="pf-nk">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }} / {{ $flowLabels[$index] ?? 'node' }}</span>
+                            <span class="pf-nv">{{ $step }}</span>
+                            <span class="pf-ns">{{ $flowStatus[$index] ?? 'online' }}</span>
+                            @unless($loop->last)
+                                <span class="pf-arrow" aria-hidden="true">→</span>
+                            @endunless
+                        </div>
                     @endforeach
                 </div>
-                @if($contactEmail)
-                    <p id="contact-email-status" class="mt-4 text-sm font-semibold text-emerald-700 dark:text-emerald-300" role="status" aria-live="polite"></p>
-                @endif
+                <div class="pf-deploy-stack">
+                    @foreach($deploymentSteps as $step)
+                        <span>{{ $step }}</span>
+                    @endforeach
+                </div>
             </div>
         </div>
     </section>
+
+    <section id="contact" class="pf-wrap pf-contact">
+        <div class="pf-section-head">
+            <span class="pf-num">§ 07</span>
+            <h2>{{ __('messages.contact') }}</h2>
+            <span class="pf-right">{{ $locale === 'th' ? 'ตอบกลับภายใน 24 ชม.' : 'reply within 24h' }}</span>
+        </div>
+
+        <div class="pf-contact-grid">
+            <div>
+                <span class="pf-avail">{{ __('messages.contact_availability') }}</span>
+                <h3>{{ __('messages.portfolio_contact_heading') }}</h3>
+                <p>{{ __('messages.portfolio_contact_body') }}</p>
+            </div>
+
+            <aside class="pf-contact-card">
+                @if($contactEmail)
+                    <div class="pf-row">
+                        <span class="pf-k">{{ __('messages.email') }}</span>
+                        <span class="pf-v">
+                            <a href="mailto:{{ $contactEmail }}" data-no-loader data-email-link data-email="{{ $contactEmail }}">{{ $contactEmail }}</a>
+                        </span>
+                    </div>
+                @endif
+                @if($contactPhone)
+                    <div class="pf-row">
+                        <span class="pf-k">{{ __('messages.urgent_contact') }}</span>
+                        <span class="pf-v">
+                            <a href="{{ $contactPhoneHref }}" data-no-loader class="pf-phone" aria-label="{{ __('messages.urgent_contact') }} {{ $contactPhone }}">{{ $contactPhone }}</a>
+                        </span>
+                    </div>
+                @endif
+                @if($resumeThUrl || $resumeEnUrl)
+                    <div class="pf-row">
+                        <span class="pf-k">{{ $locale === 'th' ? 'เรซูเม่' : 'Resume' }}</span>
+                        <span class="pf-v pf-dl">
+                            @if($resumeThUrl)
+                                <a href="{{ $resumeThUrl }}" download>{{ __('messages.download_resume_th') }} ↓</a>
+                            @endif
+                            @if($resumeEnUrl)
+                                <a href="{{ $resumeEnUrl }}" download>{{ __('messages.download_resume_en') }} ↓</a>
+                            @endif
+                        </span>
+                    </div>
+                @endif
+                @if($visibleLinks->isNotEmpty())
+                    <div class="pf-row">
+                        <span class="pf-k">{{ $locale === 'th' ? 'ช่องทางอื่น' : 'Elsewhere' }}</span>
+                        <span class="pf-v pf-links">
+                            @foreach($visibleLinks as $link)
+                                <a href="{{ $link['url'] }}" target="{{ str_starts_with($link['url'], 'mailto:') ? '_self' : '_blank' }}" rel="noopener">{{ $link['label'] }} ↗</a>
+                            @endforeach
+                        </span>
+                    </div>
+                @endif
+                @if($contactEmail)
+                    <div class="pf-row">
+                        <span class="pf-k">&nbsp;</span>
+                        <span id="contact-email-status" class="pf-email-status" role="status" aria-live="polite"></span>
+                    </div>
+                @endif
+            </aside>
+        </div>
+    </section>
+
+    <footer class="pf-wrap pf-colophon">
+        <div>
+            <b>{{ $publicBrand }}</b> © {{ date('Y') }} — {{ $locale === 'th' ? 'ผลงานทั้งหมดสร้างในกรุงเทพฯ' : 'all work shown is my own, built in Bangkok.' }}
+        </div>
+        <div>
+            {{ $locale === 'th' ? 'จัดวางด้วย' : 'Set in' }} <b>IBM Plex Sans / Thai / Mono</b>. {{ $locale === 'th' ? 'เสิร์ฟจาก Azure VM ผ่าน Cloudflare' : 'Served from Azure VM via Cloudflare.' }}
+        </div>
+        <div class="pf-colophon-right">
+            v2 editorial build · {{ date('Y-m') }}
+        </div>
+    </footer>
 </main>
 @endsection
 
